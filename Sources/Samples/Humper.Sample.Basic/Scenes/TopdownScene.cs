@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Humper.Base;
+using Microsoft.Xna.Framework;
 using Vector2 = Humper.Base.Vector2;
 
 namespace Humper.Sample.Basic
@@ -19,13 +20,13 @@ namespace Humper.Sample.Basic
 		{
 			this.World = new World(1024, 700);
 
-			this.player1 = this.World.Create(50, 50, 24, 24).AddTags(Tags.Group1);
-			this.player2 = this.World.Create(100, 50, 24, 24).AddTags(Tags.Group1);
+			this.player1 = this.World.Create(new RectangleF(50, 50, 24, 24)).AddTags(Tags.Group1);
+			this.player2 = this.World.Create(new RectangleF(100, 50, 24, 24)).AddTags(Tags.Group1);
 
 			// Map
-			this.World.Create(100, 100, 150, 20).AddTags(Tags.Group2);
-			this.World.Create(180, 140, 200, 200).AddTags(Tags.Group2);
-			this.World.Create(190, 20, 80, 400).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(100, 100, 150, 20)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(180, 140, 200, 200)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(190, 20, 80, 400)).AddTags(Tags.Group2);
 		}
 
 		public override void Update(GameTime time)

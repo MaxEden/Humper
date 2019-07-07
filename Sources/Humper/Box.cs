@@ -9,10 +9,10 @@
     {
         #region Constructors 
 
-        public Box(World world, float x, float y, float width, float height)
+        public Box(World world, RectangleF area)
         {
             this.world = world;
-            this.bounds = new RectangleF(x, y, width, height);
+            this.bounds = area;
         }
 
         #endregion

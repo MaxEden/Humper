@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Humper.Base;
+using Microsoft.Xna.Framework;
 using Vector2 = Humper.Base.Vector2;
 
 namespace Humper.Sample.Basic
@@ -73,23 +74,23 @@ namespace Humper.Sample.Basic
 
 			this.SpawnPlayer();
 
-			this.platform = this.World.Create(0, 200, 100, 20).AddTags(Tags.Group4);
+			this.platform = this.World.Create(new RectangleF(0, 200, 100, 20)).AddTags(Tags.Group4);
 
 			this.crates = new[]
 			{
-				new Crate(this.World.Create(150, 220, 40, 40)),
-				new Crate(this.World.Create(210, 220, 40, 40)),
+				new Crate(this.World.Create(new RectangleF(150, 220, 40, 40))),
+				new Crate(this.World.Create(new RectangleF(210, 220, 40, 40))),
 			};
 
 			// Map
-			this.World.Create(0, 300, 400, 20).AddTags(Tags.Group2);
-			this.World.Create(380, 320, 20, 80).AddTags(Tags.Group2);
-			this.World.Create(380, 400, 300, 20).AddTags(Tags.Group2);
-			this.World.Create(420, 200, 200, 20).AddTags(Tags.Group2);
-			this.World.Create(680, 220, 20, 200).AddTags(Tags.Group2);
-			this.World.Create(680, 200, 200, 20).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(0, 300, 400, 20)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(380, 320, 20, 80)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(380, 400, 300, 20)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(420, 200, 200, 20)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(680, 220, 20, 200)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(680, 200, 200, 20)).AddTags(Tags.Group2);
 
-			this.World.Create(400, 300, 280, 100).AddTags(Tags.Group3);
+			this.World.Create(new RectangleF(400, 300, 280, 100)).AddTags(Tags.Group3);
 		}
 
 		private void SpawnPlayer()
@@ -97,7 +98,7 @@ namespace Humper.Sample.Basic
 			if(this.player1 != null)
 				this.World.Remove(this.player1);
 
-			this.player1 = this.World.Create(50, 50, 10, 24).AddTags(Tags.Group1);
+			this.player1 = this.World.Create(new RectangleF(50, 50, 10, 24)).AddTags(Tags.Group1);
 			this.velocity = Vector2.Zero;
 		}
 

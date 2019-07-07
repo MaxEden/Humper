@@ -6,7 +6,7 @@
 	using Base;
 	using Responses;
 
-	public class World : IWorld
+	public class World 
 	{
 		public World(float width, float height, float cellSize = 64)
 		{
@@ -22,9 +22,9 @@
 
 		private Grid grid;
 
-		public IBox Create(float x, float y, float width, float height)
+		public IBox Create(RectangleF area)
 		{
-			var box = new Box(this, x, y, width, height);
+			var box = new Box(this, area);
 			this.grid.Add(box);
 			return box;
 		}

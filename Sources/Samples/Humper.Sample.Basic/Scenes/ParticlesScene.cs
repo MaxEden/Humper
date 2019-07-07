@@ -65,16 +65,16 @@ namespace Humper.Sample.Basic
 			this.SpawnPlayer();
 
 			// Map
-			this.World.Create(0, 0, 1024, 20).AddTags(Tags.Group2);
-			this.World.Create(0, 20, 20, 660).AddTags(Tags.Group2);
-			this.World.Create(1004, 20, 20, 660).AddTags(Tags.Group2);
-			this.World.Create(0, 680, 1024, 20).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(0, 0, 1024, 20)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(0, 20, 20, 660)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(1004, 20, 20, 660)).AddTags(Tags.Group2);
+			this.World.Create(new RectangleF(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
 			for (int x = 24; x < 1000; x+=40)
 			{
-				var box = this.World.Create(x, 40, 10, 10).AddTags(Tags.Group3);
+				var box = this.World.Create(new RectangleF(x, 40, 10, 10)).AddTags(Tags.Group3);
 				this.particles.Add(new Particle(box));
-				box = this.World.Create(x, 80, 10, 10).AddTags(Tags.Group3);
+				box = this.World.Create(new RectangleF(x, 80, 10, 10)).AddTags(Tags.Group3);
 				this.particles.Add(new Particle(box));
 			}
 
@@ -85,7 +85,7 @@ namespace Humper.Sample.Basic
 			if (this.player1 != null)
 				this.World.Remove(this.player1);
 
-			this.player1 = this.World.Create(50, 100, 50, 30).AddTags(Tags.Group1);
+			this.player1 = this.World.Create(new RectangleF(50, 100, 50, 30)).AddTags(Tags.Group1);
 			this.velocity = Vector2.Zero;
 		}
 
