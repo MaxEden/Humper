@@ -41,15 +41,6 @@
 		/// <summary>
 		/// Find the boxes contained in the given area of the world.
 		/// </summary>
-		/// <param name="x">The x coordinate.</param>
-		/// <param name="y">The y coordinate.</param>
-		/// <param name="w">The width.</param>
-		/// <param name="h">The height.</param>
-		IEnumerable<IBox> Find(float x, float y, float w, float h);
-
-		/// <summary>
-		/// Find the boxes contained in the given area of the world.
-		/// </summary>
 		/// <param name="area">Area.</param>
 		IEnumerable<IBox> Find(RectangleF area);
 
@@ -91,7 +82,7 @@
 		/// <param name="x">The x coordinate.</param>
 		/// <param name="y">The y coordinate.</param>
 		/// <param name="filter">Filter.</param>
-		IMovement Simulate(Box box, float x, float y, Func<ICollision, ICollisionResponse> filter);
+		IMovement Simulate(Box box, Vector2 destination, Func<ICollision, ICollisionResponse> filter);
 
 		#endregion
 
@@ -100,14 +91,10 @@
 		/// <summary>
 		/// Draws the debug layer.
 		/// </summary>
-		/// <param name="x">The x coordinate.</param>
-		/// <param name="y">The y coordinate.</param>
-		/// <param name="w">The width.</param>
-		/// <param name="h">The height.</param>
 		/// <param name="drawCell">Draw cell.</param>
 		/// <param name="drawBox">Draw box.</param>
 		/// <param name="drawString">Draw string.</param>
-		void DrawDebug(int x, int y, int w, int h, Action<int, int, int, int, float> drawCell, Action<IBox> drawBox, Action<string, int, int, float> drawString);
+		void DrawDebug(RectangleF area, Action<int, int, int, int, float> drawCell, Action<IBox> drawBox, Action<string, int, int, float> drawString);
 
 		#endregion
 	}

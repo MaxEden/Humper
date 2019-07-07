@@ -1,8 +1,10 @@
-﻿namespace Humper.Sample.Basic
+﻿using Microsoft.Xna.Framework;
+using Vector2 = Humper.Base.Vector2;
+
+namespace Humper.Sample.Basic
 {
 	using System;
 	using Responses;
-	using Microsoft.Xna.Framework;
 	using Microsoft.Xna.Framework.Input;
 	using System.Linq;
 
@@ -30,7 +32,7 @@
 				if (inWater)
 					velocity.Y *= 0.5f;
 
-				var move = box.Move(box.X + delta * velocity.X, box.Y + delta * velocity.Y, (collision) =>
+				var move = box.Move(box.Bounds.Location + delta * velocity, (collision) =>
 				{
 					if (collision.Other.HasTag(Tags.Group3))
 					{
@@ -120,12 +122,12 @@
 
 		private void UpdatePlatform(IBox platform, float delta)
 		{
-			if ((platform.X < 50 && platformVelocity.X < 0) || (platform.X > 300 && platformVelocity.X > 0))
+			if ((platform.Bounds.X < 50 && platformVelocity.X < 0) || (platform.Bounds.X > 300 && platformVelocity.X > 0))
 			{
 				this.platformVelocity.X *= -1;
 			}
 
-			platform.Move(platform.X + this.platformVelocity.X * delta, platform.Y, (collistion) => CollisionResponses.None);
+			platform.Move(new Vector2(platform.Bounds.X + this.platformVelocity.X * delta, platform.Bounds.Y), (collistion) => CollisionResponses.None);
 		}
 
 		private void UpdatePlayer(IBox player, float delta, Keys left, Keys up, Keys right, Keys down)
@@ -148,7 +150,7 @@
 				velocity.Y *= 0.75f;
 
 			// Moving player
-			var move = player.Move(player.X + delta * velocity.X, player.Y + delta * velocity.Y, (collision) =>
+			var move = player.Move(player.Bounds.Location + delta * velocity, (collision) =>
 			{
 				if (collision.Other.HasTag(Tags.Group3))
 				{

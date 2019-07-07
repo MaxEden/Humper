@@ -29,17 +29,9 @@
 			return box;
 		}
 
-		public IEnumerable<IBox> Find(float x, float y, float w, float h)
-		{
-			x = Math.Max(0, Math.Min(x, this.Bounds.Right - w));
-			y = Math.Max(0, Math.Min(y, this.Bounds.Bottom - h));
-
-			return this.grid.QueryBoxes(x, y, w, h);
-		}
-
 		public IEnumerable<IBox> Find(RectangleF area)
 		{
-			return this.Find(area.X, area.Y, area.Width, area.Height);
+			return this.grid.QueryBoxes(area);
 		}
 
 		public bool Remove(IBox box)
@@ -58,7 +50,7 @@
 
 		public IHit Hit(Vector2 point, IEnumerable<IBox> ignoring = null)
 		{
-			var boxes = this.Find(point.X, point.Y, 0, 0);
+			var boxes = this.grid.QueryBoxes(new RectangleF(point,Vector2.Zero));
 
 			if (ignoring != null)
 			{
@@ -83,8 +75,8 @@
 			var min = Vector2.Min(origin, destination);
 			var max = Vector2.Max(origin, destination);
 
-			var wrap = new RectangleF(min, max - min);
-			var boxes = this.Find(wrap.X, wrap.Y, wrap.Width, wrap.Height);
+			var wrap = RectangleF.FromPoints(min, max);
+			var boxes = this.Find(wrap);
 
 			if (ignoring != null)
 			{
@@ -109,7 +101,7 @@
 		public IHit Hit(RectangleF origin, RectangleF destination, IEnumerable<IBox> ignoring = null)
 		{
 			var wrap = new RectangleF(origin, destination);
-			var boxes = this.Find(wrap.X, wrap.Y, wrap.Width, wrap.Height);
+			var boxes = this.Find(wrap);
 
 			if (ignoring != null)
 			{
@@ -135,18 +127,18 @@
 
 		#region Movements
 
-		public IMovement Simulate(Box box, float x, float y, Func<ICollision, ICollisionResponse> filter)
+		public IMovement Simulate(Box box, Vector2 destination, Func<ICollision, ICollisionResponse> filter)
 		{
 			var origin = box.Bounds;
-			var destination = new RectangleF(x, y, box.Width, box.Height);
+			var goal = new RectangleF(destination, box.Bounds.Size);
 
 			var hits = new List<IHit>();
 
 			var result = new Movement()
 			{
 				Origin = origin,
-				Goal = destination,
-				Destination = this.Simulate(hits, new List<IBox>() { box }, box, origin, destination, filter),
+				Goal = goal,
+				Destination = this.Simulate(hits, new List<IBox>() { box }, box, origin, goal, filter),
 				Hits = hits,
 			};
 
@@ -179,17 +171,17 @@
 
 		#region Diagnostics
 
-		public void DrawDebug(int x, int y, int w, int h, Action<int,int,int,int,float> drawCell, Action<IBox> drawBox, Action<string,int,int, float> drawString)
+		public void DrawDebug(RectangleF area, Action<int,int,int,int,float> drawCell, Action<IBox> drawBox, Action<string,int,int, float> drawString)
 		{
 			// Drawing boxes
-			var boxes = this.grid.QueryBoxes(x, y, w, h);
+			var boxes = this.grid.QueryBoxes(area);
 			foreach (var box in boxes)
 			{
 				drawBox(box);
 			}
 
 			// Drawing cells
-			var cells = this.grid.QueryCells(x, y, w, h);
+			var cells = this.grid.QueryCells(area);
 			foreach (var cell in cells)
 			{
 				var count = cell.Count();

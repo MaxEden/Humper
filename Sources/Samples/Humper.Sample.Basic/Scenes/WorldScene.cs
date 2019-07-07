@@ -30,7 +30,7 @@ namespace Humper.Sample.Basic
 		{
 			var b = this.World.Bounds;
 			this.spriteBatch = sb;
-			this.World.DrawDebug((int)b.X, (int)b.Y, (int)b.Width, (int)b.Height, DrawCell, DrawBox, DrawString);
+			this.World.DrawDebug(b, DrawCell, DrawBox, DrawString);
 		}
 
 		private void DrawCell(int x, int y, int w, int h, float alpha)

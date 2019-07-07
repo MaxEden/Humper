@@ -1,8 +1,10 @@
-﻿namespace Humper.Sample.Basic
+﻿using Microsoft.Xna.Framework;
+using Vector2 = Humper.Base.Vector2;
+
+namespace Humper.Sample.Basic
 {
 	using System;
 	using Responses;
-	using Microsoft.Xna.Framework;
 	using Microsoft.Xna.Framework.Input;
 
 	public class TopdownScene : WorldScene
@@ -48,7 +50,7 @@
 			if (k.IsKeyDown(up)) 
 				velocity.Y -= 0.1f;
 			
-			var move = player.Move(player.X + delta * velocity.X, player.Y + delta * velocity.Y, (collision) => CollisionResponses.Slide);
+			var move = player.Move(player.Bounds.Location + delta * velocity, (collision) => CollisionResponses.Slide);
 
 		}
 

@@ -1,153 +1,151 @@
 ﻿namespace Humper
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Base;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Base;
 
-	/// <summary>
-	/// Basic spacial hashing of world's boxes.
-	/// </summary>
-	public class Grid
-	{
-		public class Cell
-		{
-			public Cell(int x, int y, float cellSize)
-			{
-				this.Bounds = new RectangleF(x * cellSize, y * cellSize, cellSize, cellSize);
-			}
+    /// <summary>
+    /// Basic spacial hashing of world's boxes.
+    /// </summary>
+    public class Grid
+    {
+        public class Cell
+        {
+            public Cell(int x, int y, float cellSize)
+            {
+                Bounds = new RectangleF(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
 
-			public RectangleF Bounds { get; private set; }
+            public RectangleF Bounds { get; private set; }
 
-			public IEnumerable<IBox> Children => this.children;
+            public IEnumerable<IBox> Children => children;
 
-			private List<IBox> children = new List<IBox>();
+            private List<IBox> children = new List<IBox>();
 
-			public void Add(IBox box)
-			{
-				this.children.Add(box);
-			}
+            public void Add(IBox box)
+            {
+                children.Add(box);
+            }
 
-			public bool Contains(IBox box)
-			{
-				return this.children.Contains(box);
-			}
+            public bool Contains(IBox box)
+            {
+                return children.Contains(box);
+            }
 
-			public bool Remove(IBox box)
-			{
-				return this.children.Remove(box);
-			}
+            public bool Remove(IBox box)
+            {
+                return children.Remove(box);
+            }
 
-			public int Count()
-			{
-				return this.children.Count;
-			}
-		}
+            public int Count()
+            {
+                return children.Count;
+            }
+        }
 
-		public Grid(int width, int height, float cellSize)
-		{
-			this.Cells = new Cell[width, height];
-			this.CellSize = cellSize;
-		}
+        public Grid(int width, int height, float cellSize)
+        {
+            Cells = new Cell[width, height];
+            CellSize = cellSize;
+        }
 
-		public float CellSize { get; set; }
+        public float CellSize { get; set; }
 
-		#region Size
+        #region Size
 
-		public float Width => this.Columns * CellSize;
+        public float Width => Columns * CellSize;
 
-		public float Height => this.Rows * CellSize;
+        public float Height => Rows * CellSize;
 
-		public int Columns => this.Cells.GetLength(0);
+        public int Columns => Cells.GetLength(0);
 
-		public int Rows => this.Cells.GetLength(1);
+        public int Rows => Cells.GetLength(1);
 
-		#endregion
+        #endregion
 
-		public Cell[,] Cells { get; private set; }
+        public Cell[,] Cells { get; private set; }
 
-		public IEnumerable<Cell> QueryCells(float x, float y, float w, float h)
-		{
-			var minX = (int)(x / this.CellSize);
-			var minY = (int)(y / this.CellSize);
-			var maxX = (int)((x + w - 1) / this.CellSize) + 1;
-			var maxY = (int)((y + h - 1) / this.CellSize) + 1;
+        public IEnumerable<Cell> QueryCells(RectangleF area)
+        {
+            var minX = (int)(area.Left / CellSize);
+            var minY = (int)(area.Top / CellSize);
+            var maxX = (int)(area.Right / CellSize) + 1;
+            var maxY = (int)(area.Bottom / CellSize) + 1;
 
-			minX = Math.Max(0, minX);
-			minY = Math.Max(0, minY);
-			maxX = Math.Min(this.Columns - 1, maxX);
-			maxY = Math.Min(this.Rows - 1, maxY);
+            minX = Math.Max(0, minX);
+            minY = Math.Max(0, minY);
+            maxX = Math.Min(Columns - 1, maxX);
+            maxY = Math.Min(Rows - 1, maxY);
 
-			List<Cell> result = new List<Cell>();
+            List<Cell> result = new List<Cell>();
 
-			for (int ix = minX; ix <= maxX; ix++)
-			{
-				for (int iy = minY; iy <= maxY; iy++)
-				{
-					var cell = Cells[ix, iy];
+            for(int x = minX; x <= maxX; x++)
+            {
+                for(int y = minY; y <= maxY; y++)
+                {
+                    var cell = Cells[x, y];
 
-					if (cell == null)
-					{
-						cell = new Cell(ix,iy,CellSize);
-						Cells[ix, iy] = cell;
-					}
+                    if(cell == null)
+                    {
+                        cell = new Cell(x, y, CellSize);
+                        Cells[x, y] = cell;
+                    }
 
-					result.Add(cell);
-				}
-			}
+                    result.Add(cell);
+                }
+            }
 
-			return result;
+            return result;
 
-		}
+        }
 
-		public IEnumerable<IBox> QueryBoxes(float x, float y, float w, float h)
-		{
-			var cells = this.QueryCells(x, y, w, h);
+        public IEnumerable<IBox> QueryBoxes(RectangleF area)
+        {
+            var cells = QueryCells(area);
+            return cells.SelectMany((cell) => cell.Children).Distinct();
+        }
 
-			return cells.SelectMany((cell) => cell.Children).Distinct();
-		}
+        public void Add(IBox box)
+        {
+            var cells = QueryCells(box.Bounds);
 
-		public void Add(IBox box)
-		{
-			var cells = this.QueryCells(box.X, box.Y, box.Width, box.Height);
+            foreach(var cell in cells)
+            {
+                if(!cell.Contains(box))
+                    cell.Add(box);
+            }
+        }
 
-			foreach (var cell in cells)
-			{
-				if(!cell.Contains(box))
-					cell.Add(box);
-			}
-		}
+        public void Update(IBox box, RectangleF from)
+        {
+            var fromCells = QueryCells(from);
+            var removed = false;
+            foreach(var cell in fromCells)
+            {
+                removed |= cell.Remove(box);
+            }
 
-		public void Update(IBox box, RectangleF from)
-		{
-			var fromCells = this.QueryCells(from.X, from.Y, from.Width, from.Height);
-			var removed = false;
-			foreach (var cell in fromCells)
-			{
-				removed |= cell.Remove(box);
-			}
+            if(removed)
+                Add(box);
+        }
 
-			if(removed)
-				this.Add(box);
-		}
+        public bool Remove(IBox box)
+        {
+            var cells = this.QueryCells(box.Bounds);
 
-		public bool Remove(IBox box)
-		{
-			var cells = this.QueryCells(box.X, box.Y, box.Width, box.Height);
+            var removed = false;
+            foreach(var cell in cells)
+            {
+                removed |= cell.Remove(box);
+            }
 
-			var removed = false;
-			foreach (var cell in cells)
-			{
-				removed |= cell.Remove(box);
-			}
+            return removed;
+        }
 
-			return removed;
-		}
-
-		public override string ToString()
-		{
-			return string.Format("[Grid: Width={0}, Height={1}, Columns={2}, Rows={3}]", Width, Height, Columns, Rows);
-		}
-	}
+        public override string ToString()
+        {
+            return string.Format("[Grid: Width={0}, Height={1}, Columns={2}, Rows={3}]", Width, Height, Columns, Rows);
+        }
+    }
 }
-

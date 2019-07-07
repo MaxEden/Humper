@@ -1,8 +1,10 @@
-﻿namespace Humper.Sample.Basic
+﻿using Microsoft.Xna.Framework;
+using Vector2 = Humper.Base.Vector2;
+
+namespace Humper.Sample.Basic
 {
 	using System;
 	using Responses;
-	using Microsoft.Xna.Framework;
 	using Microsoft.Xna.Framework.Input;
 	using System.Linq;
 	using System.Collections.Generic;
@@ -27,7 +29,8 @@
 			{
 				Velocity = Velocity + Vector2.UnitY * delta * 0.001f;
 
-				var move = this.Box.Move(Box.X + delta * Velocity.X, Box.Y + delta * Velocity.Y, (collision) =>
+				var move = this.Box.Move(
+					delta*Velocity + Box.Bounds.Location, (collision) =>
 				{
 					return CollisionResponses.Bounce;
 				});
@@ -39,7 +42,7 @@
 				}
 
 				// Testing if on wall
-				if (move.Hits.Any((c) => (c.Normal.X != 0)))
+				if (move.Hits.Any((c) => (Math.Abs(c.Normal.X) > 0.001f)))
 				{
 					Velocity = Velocity * new Vector2(-1, 1);
 				}
@@ -115,7 +118,7 @@
 				velocity.Y -= 0.5f;
 
 			// Moving player
-			var move = player.Move(player.X + delta * velocity.X, player.Y + delta * velocity.Y, (collision) =>
+			var move = player.Move(player.Bounds.Location + delta * velocity, (collision) =>
 			{
 				return CollisionResponses.Slide;
 			});
