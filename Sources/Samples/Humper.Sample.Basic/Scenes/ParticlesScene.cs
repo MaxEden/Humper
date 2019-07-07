@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Humper.Base;
+using Microsoft.Xna.Framework;
 using Vector2 = Humper.Base.Vector2;
 
 namespace Humper.Sample.Basic
@@ -42,7 +43,7 @@ namespace Humper.Sample.Basic
 				}
 
 				// Testing if on wall
-				if (move.Hits.Any((c) => (Math.Abs(c.Normal.X) > 0.001f)))
+				if (move.Hits.Any((c) => (Math.Abs(c.Normal.X) > Constants.Threshold)))
 				{
 					Velocity = Velocity * new Vector2(-1, 1);
 				}

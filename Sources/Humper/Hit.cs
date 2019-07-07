@@ -119,9 +119,9 @@
 			return new Tuple<Vector2, Vector2>(position,normal);
 		}
 
-		private static Tuple<RectangleF,Vector2> PushOutside(RectangleF origin, RectangleF other)
+		private static (Vector2 position, Vector2 normal) PushOutside(RectangleF origin, RectangleF other)
 		{
-			var position = origin;
+			var position = origin.Location;
 			var normal = Vector2.Zero;
 
 			var top = origin.Center.Y - other.Top;
@@ -134,25 +134,25 @@
 			if (Math.Abs(min - top) < Constants.Threshold)
 			{
 				normal = -Vector2.UnitY;
-				position.Location = new Vector2(position.Location.X, other.Top - position.Height);
+				position = new Vector2(position.X, other.Top - origin.Height);
 			}
 			else if (Math.Abs(min - bottom) < Constants.Threshold)
 			{
 				normal = Vector2.UnitY;
-				position.Location = new Vector2(position.Location.X, other.Bottom);
+				position = new Vector2(position.X, other.Bottom);
 			}
 			else if (Math.Abs(min - left) < Constants.Threshold)
 			{
 				normal = -Vector2.UnitX;
-				position.Location = new Vector2(other.Left - position.Width, position.Location.Y);
+				position = new Vector2(other.Left - origin.Width, position.Y);
 			}
 			else if (Math.Abs(min - right) < Constants.Threshold)
 			{
 				normal = Vector2.UnitX;
-				position.Location = new Vector2(other.Right, position.Location.Y);
+				position = new Vector2(other.Right, position.Y);
 			}
 
-			return new Tuple<RectangleF, Vector2>(position,normal);
+			return (position, normal);
 		}
 
 		private static Hit ResolveNarrow(RectangleF origin, RectangleF destination, RectangleF other)
@@ -164,8 +164,8 @@
 				return new Hit()
 				{
 					Amount = 0,
-					Position = outside.Item1.Location,
-					Normal = outside.Item2,
+					Position = outside.position,
+					Normal = outside.normal,
 				};
 			}
 
