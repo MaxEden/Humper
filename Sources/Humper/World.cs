@@ -22,10 +22,13 @@
 
 		private Grid grid;
 
+		public int Boxes {get;private set;}
+
 		public IBox Create(RectangleF area)
 		{
 			var box = new Box(this, area);
 			this.grid.Add(box);
+			Boxes++;
 			return box;
 		}
 
@@ -36,6 +39,7 @@
 
 		public bool Remove(IBox box)
 		{
+			Boxes--;
 			return this.grid.Remove(box);
 		}
 

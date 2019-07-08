@@ -18,7 +18,7 @@ namespace Humper.Sample.Basic
 		{
 			get
 			{
-				return $"[Up,Right,Down,Left]: move\n[Space]: show grid";
+				return $"[Up,Right,Down,Left]: move\n[Space]: show grid; Boxes count:" + World.Boxes;
 			} 
 		}
 

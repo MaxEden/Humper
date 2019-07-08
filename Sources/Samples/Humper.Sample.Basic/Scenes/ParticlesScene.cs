@@ -1,5 +1,6 @@
 ﻿using Humper.Base;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Vector2 = Humper.Base.Vector2;
 
 namespace Humper.Sample.Basic
@@ -70,12 +71,21 @@ namespace Humper.Sample.Basic
 			this.World.Create(new RectangleF(1004, 20, 20, 660)).AddTags(Tags.Group2);
 			this.World.Create(new RectangleF(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
-			for (int x = 24; x < 1000; x+=40)
+			int maxBoxes = 500;
+			int width = 2;
+			for (int x = 24; x < 1000; x+=width*2)
 			{
-				var box = this.World.Create(new RectangleF(x, 40, 10, 10)).AddTags(Tags.Group3);
-				this.particles.Add(new Particle(box));
-				box = this.World.Create(new RectangleF(x, 80, 10, 10)).AddTags(Tags.Group3);
-				this.particles.Add(new Particle(box));
+				for(int y = 40; y < 500; y+= width*5)
+				{
+					var box = this.World.Create(new RectangleF(
+						                            x,
+						                            y,
+						                            (float)(Particle.random.NextDouble()*width) + 0.001f,
+						                            (float)(Particle.random.NextDouble()*width) + 0.001f
+						)).AddTags(Tags.Group3);
+					this.particles.Add(new Particle(box));
+					if(World.Boxes>maxBoxes) return;
+				}
 			}
 
 		}
@@ -91,12 +101,15 @@ namespace Humper.Sample.Basic
 
 		public override void Update(GameTime time)
 		{
+			
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
 
 			foreach (var p in this.particles)
 			{
 				p.Update(delta);
 			}
+
+			return;
 			UpdatePlayer(this.player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Humper.Responses;
 using Microsoft.Xna.Framework;
@@ -21,6 +22,7 @@ namespace Humper.Sample.Basic
 			graphics = new GraphicsDeviceManager(this);
 			Content.RootDirectory = "Content";
 			this.Window.AllowUserResizing = true;
+			_stopwatch = new Stopwatch();
 		}
 
 		/// <summary>
@@ -69,6 +71,7 @@ namespace Humper.Sample.Basic
 		}
 
 		private KeyboardState state;
+		private Stopwatch _stopwatch;
 
 		/// <summary>
 		/// Allows the game to run logic such as updating the world,
@@ -87,7 +90,9 @@ namespace Humper.Sample.Basic
 				this.NextScene();
 			state = Keyboard.GetState();
 
+			//_stopwatch.Restart();
 			this.scene.Update(gameTime);
+			//_stopwatch.Stop();
 
 			base.Update(gameTime);
 		}
@@ -100,6 +105,7 @@ namespace Humper.Sample.Basic
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
+			//_stopwatch.Restart();
 			graphics.GraphicsDevice.Clear(new Color(44,45,51));
 
 			spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
@@ -107,10 +113,13 @@ namespace Humper.Sample.Basic
 			this.scene.Draw(spriteBatch);
 
 			spriteBatch.DrawString(this.font, this.scene.Message, new Vector2(20, 20), new Color(Color.White, 0.5f));
+			spriteBatch.DrawString(this.font, $"ms:{_stopwatch.ElapsedMilliseconds} fps:{1000/(_stopwatch.ElapsedMilliseconds + 0.0001f)} monogame {1 / gameTime.ElapsedGameTime.TotalSeconds:##.0}", 
+			                       new Vector2(20, 80), new Color(Color.Red, 0.5f));
 
 			spriteBatch.End();
 
 			base.Draw(gameTime);
+			//_stopwatch.Stop();
 		}
 	}
 }
