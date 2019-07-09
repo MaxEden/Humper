@@ -1,8 +1,10 @@
 ﻿using System;
+using Humper.Base;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace Humper.Sample.Basic
 {
@@ -33,10 +35,10 @@ namespace Humper.Sample.Basic
 			World.DrawDebug(b, DrawCell, DrawBox, DrawString);
 		}
 
-		private void DrawCell(int x, int y, int w, int h, float alpha)
+		private void DrawCell(Rect rect, float alpha)
 		{
 			if (Keyboard.GetState().IsKeyDown(Keys.Space))
-				spriteBatch.DrawStroke(new Rectangle(x, y, w, h), new Color(Color.White, alpha));
+				spriteBatch.DrawStroke(rect.ToRectangle(), new Color(Color.White, alpha));
 		}
 
 		private void DrawBox(Box box)

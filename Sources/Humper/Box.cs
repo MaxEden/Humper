@@ -32,7 +32,8 @@
             get { return bounds; }
         }
 
-        public object Data { get; set; }
+        public object Data;
+        internal object BroadPhaseData;
         
         #endregion
 

@@ -9,6 +9,6 @@ namespace Humper {
         Rect Bounds { get; }
         bool Remove(Box box);
         void Update(Box box, Rect @from);
-        void DrawDebug(Rect area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString);
+        void DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString);
     }
 }

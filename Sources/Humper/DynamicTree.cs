@@ -37,7 +37,7 @@ namespace Humper
     /// object to move by small amounts without triggering a tree update.
     /// Nodes are pooled and relocatable, so we use node indices rather than pointers.
     /// </summary>
-    public class DynamicTree
+    public class DynamicTree: IBroadPhase
     {
         public class Node
         {
@@ -67,6 +67,7 @@ namespace Humper
         private          Node        _root;
         private          Vector2     AABBExtension  = Vector2.Zero;
         private          Vector2     AABBMultiplier = Vector2.One;
+        private Rect _bounds;
 
         /// <summary>
         /// Constructing the tree initializes the node pool.
@@ -158,30 +159,29 @@ namespace Humper
         /// <param name="rect">The AABB.</param>
         /// <param name="userData">The user data.</param>
         /// <returns>Index of the created proxy</returns>
-        public Node AddProxy(ref Rect rect, object userData)
+        public Node AddProxy(Rect rect, object userData)
         {
-            var proxyId = AllocateNode();
+            var node = AllocateNode();
 
             // Fatten the AABB.
-            proxyId.Rect = rect.Expand(AABBExtension);
-            proxyId.UserData = userData;
-            proxyId.Height = 0;
+            node.Rect = rect.Expand(AABBExtension);
+            node.UserData = userData;
+            node.Height = 0;
 
-            InsertLeaf(proxyId);
+            InsertLeaf(node);
 
-            return proxyId;
+            return node;
         }
 
         /// <summary>
         /// Destroy a proxy. This asserts if the id is invalid.
         /// </summary>
-        /// <param name="proxyId">The proxy id.</param>
-        public void RemoveProxy(Node node)
+        public bool RemoveProxy(Node node)
         {
             Debug.Assert(node.IsLeaf());
 
             RemoveLeaf(node);
-            FreeNode(node);
+            return FreeNode(node);
         }
 
         /// <summary>
@@ -189,28 +189,28 @@ namespace Humper
         /// then the proxy is removed from the tree and re-inserted. Otherwise
         /// the function returns immediately.
         /// </summary>
-        /// <param name="proxyId">The proxy id.</param>
+        /// <param name="node">The proxy id.</param>
         /// <param name="rect">The AABB.</param>
         /// <param name="displacement">The displacement.</param>
         /// <returns>true if the proxy was re-inserted.</returns>
-        public bool MoveProxy(Node proxyId, ref Rect rect, Vector2 displacement)
+        public bool MoveProxy(Node node, Rect rect, Vector2 displacement)
         {
-            Debug.Assert(proxyId.IsLeaf());
+            Debug.Assert(node.IsLeaf());
 
-            if(proxyId.Rect.Contains(rect))
+            if(node.Rect.Contains(rect))
             {
                 return false;
             }
 
-            RemoveLeaf(proxyId);
+            RemoveLeaf(node);
 
             // Extend AABB.
-            Rect b = rect.Expand(AABBExtension);
+            Rect newRect = rect.Expand(AABBExtension);
             // Predict AABB displacement.
-            b = b.Offset(AABBMultiplier * displacement);
-            proxyId.Rect = b;
+            newRect = newRect.Offset(AABBMultiplier * displacement);
+            node.Rect = newRect;
 
-            InsertLeaf(proxyId);
+            InsertLeaf(node);
             return true;
         }
 
@@ -220,7 +220,7 @@ namespace Humper
         /// </summary>
         /// <param name="callback">The callback.</param>
         /// <param name="rect">The AABB.</param>
-        public void Query(Func<Node, bool> callback, ref Rect rect)
+        public void Query(Func<Node, bool> callback, Rect rect)
         {
             _queryStack.Clear();
             _queryStack.Push(_root);
@@ -261,7 +261,7 @@ namespace Humper
         /// </summary>
         /// <param name="callback">A callback class that is called for each proxy that is hit by the ray.</param>
         /// <param name="input">The ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).</param>
-        public void RayCast(Func<RayCastInput, Node, float> callback, ref RayCastInput input)
+        public void RayCast(Func<RayCastInput, Node, float> callback, RayCastInput input)
         {
             Vector2 p1 = input.From;
             Vector2 p2 = input.To;
@@ -351,9 +351,9 @@ namespace Humper
             return node;
         }
 
-        private void FreeNode(Node node)
+        private bool FreeNode(Node node)
         {
-            _nodes.Remove(node);
+            return _nodes.Remove(node);
         }
 
         private void InsertLeaf(Node leaf)
@@ -876,6 +876,39 @@ namespace Humper
         public Node Get(int id)
         {
             return _nodes[id - 1];
+        }
+        void IBroadPhase.Add(Box box)
+        {
+            var node = AddProxy(box.Bounds, box);
+            box.BroadPhaseData = node;
+        }
+        IEnumerable<Box> IBroadPhase.QueryBoxes(Rect area)
+        {
+            List<Box> result = new List<Box>();
+            Query(p =>
+            {
+                result.Add((Box)p.UserData);
+                return true;
+            }, area);
+
+            return result;
+        }
+        Rect IBroadPhase.Bounds => _bounds;
+        bool IBroadPhase.Remove(Box box)
+        {
+            return RemoveProxy((Node)box.BroadPhaseData);
+        }
+        void IBroadPhase.Update(Box box, Rect @from)
+        {
+            MoveProxy((Node)box.BroadPhaseData, @from, box.Bounds.Location - from.Location);
+        }
+        void IBroadPhase.DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
+        {
+            Query(p =>
+            {
+                drawCell(p.Rect, 0.25f);
+                return true;
+            }, area);
         }
     }
 }

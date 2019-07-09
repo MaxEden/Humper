@@ -101,7 +101,7 @@ namespace Humper
             return result;
 
         }
-        public void DrawDebug(Rect area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
+        public void DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
         {
             // Drawing cells
             var cells = QueryCells(area);
@@ -109,7 +109,7 @@ namespace Humper
             {
                 var count = cell.Count();
                 var alpha = count > 0 ? 1f : 0.4f;
-                drawCell((int)cell.Bounds.X, (int)cell.Bounds.Y, (int)cell.Bounds.Width, (int)cell.Bounds.Height, alpha);
+                drawCell(cell.Bounds, alpha);
                 drawString(count.ToString(), (int)cell.Bounds.Center.X, (int)cell.Bounds.Center.Y,alpha);
             }
         }

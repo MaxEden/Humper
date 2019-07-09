@@ -172,7 +172,7 @@
 
 		#region Diagnostics
 
-		public void DrawDebug(Rect area, Action<int,int,int,int,float> drawCell, Action<Box> drawBox, Action<string,int,int, float> drawString)
+		public void DrawDebug(Rect area, Action<Rect,float> drawCell, Action<Box> drawBox, Action<string,int,int, float> drawString)
 		{
 			// Drawing boxes
 			var boxes = _broadPhase.QueryBoxes(area);
