@@ -20,13 +20,13 @@ namespace Humper.Sample.Basic
 		{
 			World = new World(new Grid(1024, 700));
 
-			player1 = World.Create(new RectangleF(50, 50, 24, 24)).AddTags(Tags.Group1);
-			player2 = World.Create(new RectangleF(100, 50, 24, 24)).AddTags(Tags.Group1);
+			player1 = World.Create(new Rect(50, 50, 24, 24)).AddTags(Tags.Group1);
+			player2 = World.Create(new Rect(100, 50, 24, 24)).AddTags(Tags.Group1);
 
 			// Map
-			World.Create(new RectangleF(100, 100, 150, 20)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(180, 140, 200, 200)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(190, 20, 80, 400)).AddTags(Tags.Group2);
+			World.Create(new Rect(100, 100, 150, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(180, 140, 200, 200)).AddTags(Tags.Group2);
+			World.Create(new Rect(190, 20, 80, 400)).AddTags(Tags.Group2);
 		}
 
 		public override void Update(GameTime time)

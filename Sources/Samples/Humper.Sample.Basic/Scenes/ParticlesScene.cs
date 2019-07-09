@@ -66,10 +66,10 @@ namespace Humper.Sample.Basic
 			SpawnPlayer();
 
 			// Map
-			World.Create(new RectangleF(0, 0, 1024, 20)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(0, 20, 20, 660)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(1004, 20, 20, 660)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(0, 680, 1024, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(0, 0, 1024, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(0, 20, 20, 660)).AddTags(Tags.Group2);
+			World.Create(new Rect(1004, 20, 20, 660)).AddTags(Tags.Group2);
+			World.Create(new Rect(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
 			int maxBoxes = 500;
 			int width = 2;
@@ -77,7 +77,7 @@ namespace Humper.Sample.Basic
 			{
 				for(int y = 40; y < 500; y+= width*5)
 				{
-					var box = World.Create(new RectangleF(
+					var box = World.Create(new Rect(
 						                            x,
 						                            y,
 						                            (float)(Particle.random.NextDouble()*width) + 0.001f,
@@ -95,7 +95,7 @@ namespace Humper.Sample.Basic
 			if (player1 != null)
 				World.Remove(player1);
 
-			player1 = World.Create(new RectangleF(50, 100, 50, 30)).AddTags(Tags.Group1);
+			player1 = World.Create(new Rect(50, 100, 50, 30)).AddTags(Tags.Group1);
 			velocity = Vector2.Zero;
 		}
 

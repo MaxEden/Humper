@@ -12,10 +12,10 @@
 			var dot = collision.Hit.Remaining * (velocity.X * normal.Y + velocity.Y * normal.X);
 			var slide = new Vector2(normal.Y, normal.X) * dot;
 
-			this.Destination = new RectangleF(collision.Hit.Position + slide, collision.Goal.Size);
+			this.Destination = new Rect(collision.Hit.Position + slide, collision.Goal.Size);
 		}
 
-		public RectangleF Destination { get; private set; }
+		public Rect Destination { get; private set; }
 	}
 }
 

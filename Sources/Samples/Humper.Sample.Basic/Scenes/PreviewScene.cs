@@ -14,20 +14,20 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private RectangleF origin;
+		private Rect origin;
 
-		private RectangleF goal;
+		private Rect goal;
 
-		private RectangleF destination;
+		private Rect destination;
 
-		private RectangleF collision;
+		private Rect collision;
 
-		private RectangleF other;
+		private Rect other;
 
-		private RectangleF normal;
+		private Rect normal;
 
 		private bool moveDestination, isMoving;
-		private RectangleF cursor, selected;
+		private Rect cursor, selected;
 
 		private CollisionResponses[] values = Enum.GetValues(typeof(CollisionResponses)) as CollisionResponses[];
 		private int response = 0;
@@ -54,18 +54,18 @@ namespace Humper.Sample.Basic
 			sb.Draw(normal, color: Color.Orange, fillOpacity: 0.3f);
 			sb.Draw(destination, color: Color.Green, fillOpacity: 0.0f);
 			var s = destination.Size / 10;
-			sb.Draw(new RectangleF(destination.Center - (s / 2), s), color: Color.Green, fillOpacity: 0.0f);
+			sb.Draw(new Rect(destination.Center - (s / 2), s), color: Color.Green, fillOpacity: 0.0f);
 			sb.Draw(cursor, color: Color.White, fillOpacity: 0.0f);
 			sb.Draw(selected, color: Color.White, fillOpacity: 0.5f);
 		}
 
 		public void Initialize()
 		{
-			origin = new RectangleF(0, 0, 100, 100);
-			goal = new RectangleF(400, 300, 100, 100);
-			selected = new RectangleF(-3, -3 , 6, 6);
+			origin = new Rect(0, 0, 100, 100);
+			goal = new Rect(400, 300, 100, 100);
+			selected = new Rect(-3, -3 , 6, 6);
 
-			other = new RectangleF(200, 200, 500, 120);
+			other = new Rect(200, 200, 500, 120);
 		}
 
 
@@ -90,7 +90,7 @@ namespace Humper.Sample.Basic
 			var m = Mouse.GetState().Position;
 			var pos = new Base.Vector2(m.X, m.Y);
 			var size = isMoving ? 18 : 6;
-			cursor = new RectangleF(m.X - size/2, m.Y - size/2,size, size);
+			cursor = new Rect(m.X - size/2, m.Y - size/2,size, size);
 
 
 			if (isMoving)
@@ -113,8 +113,8 @@ namespace Humper.Sample.Basic
 
 			if (hit != null && r != CollisionResponses.None)
 			{
-				collision = new RectangleF(hit.Position, origin.Size);
-				normal = new RectangleF(collision.Center + hit.Normal * 50, new Base.Vector2(5, 5));
+				collision = new Rect(hit.Position, origin.Size);
+				normal = new Rect(collision.Center + hit.Normal * 50, new Base.Vector2(5, 5));
 
 				// Destination
 				var collisionPoint = new Collision()
@@ -128,8 +128,8 @@ namespace Humper.Sample.Basic
 			}
 			else
 			{
-				collision = new RectangleF();
-				normal = new RectangleF();
+				collision = new Rect();
+				normal = new Rect();
 				destination = goal;
 			}
 				

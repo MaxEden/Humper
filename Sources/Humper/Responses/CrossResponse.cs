@@ -9,7 +9,7 @@
 			this.Destination = collision.Goal;
 		}
 
-		public RectangleF Destination { get; private set; }
+		public Rect Destination { get; private set; }
 	}
 }
 

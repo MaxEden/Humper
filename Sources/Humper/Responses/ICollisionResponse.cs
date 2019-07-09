@@ -10,7 +10,7 @@
 		/// Gets the new destination of the box after the collision.
 		/// </summary>
 		/// <value>The destination.</value>
-		RectangleF Destination { get; }
+		Rect Destination { get; }
 	}
 }
 

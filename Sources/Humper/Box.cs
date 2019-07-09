@@ -9,7 +9,7 @@
     {
         #region Constructors 
 
-        public Box(World world, RectangleF area)
+        public Box(World world, Rect area)
         {
             this.world = world;
             this.bounds = area;
@@ -21,13 +21,13 @@
 
         private World world;
 
-        private RectangleF bounds;
+        private Rect bounds;
 
         #endregion
 
         #region Properties
 
-        public RectangleF Bounds
+        public Rect Bounds
         {
             get { return bounds; }
         }

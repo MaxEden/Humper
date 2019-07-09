@@ -12,9 +12,9 @@ namespace Humper
 
 		public Box Other { get { return this.Hit?.Box; } }
 
-		public RectangleF Origin { get; set; }
+		public Rect Origin { get; set; }
 
-		public RectangleF Goal { get; set; }
+		public Rect Goal { get; set; }
 
 		public IHit Hit { get; set; }
 

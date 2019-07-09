@@ -20,10 +20,10 @@
 				deflected.Y *= -1;
 			}
 
-			this.Destination = new RectangleF(collision.Hit.Position + deflected, collision.Goal.Size);
+			this.Destination = new Rect(collision.Hit.Position + deflected, collision.Goal.Size);
 		}
 
-		public RectangleF Destination { get; private set; }
+		public Rect Destination { get; private set; }
 	}
 }
 

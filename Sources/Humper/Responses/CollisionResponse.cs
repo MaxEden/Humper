@@ -19,7 +19,7 @@ namespace Humper.Responses
 
 		private ICollisionResponse child;
 
-		public RectangleF Destination { get { return child.Destination; } }
+		public Rect Destination { get { return child.Destination; } }
 
 		public static ICollisionResponse Create(ICollision col, CollisionResponses response)
 		{

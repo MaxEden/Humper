@@ -6,10 +6,10 @@
 	{
 		public TouchResponse(ICollision collision)
 		{
-			this.Destination = new RectangleF(collision.Hit.Position, collision.Goal.Size);
+			this.Destination = new Rect(collision.Hit.Position, collision.Goal.Size);
 		}
 
-		public RectangleF Destination { get; private set; }
+		public Rect Destination { get; private set; }
 	}
 }
 

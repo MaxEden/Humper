@@ -23,7 +23,7 @@
 
 		#region Public functions
 
-		public static IHit Resolve(RectangleF origin, RectangleF destination, Box other)
+		public static IHit Resolve(Rect origin, Rect destination, Box other)
 		{
 			var result = Resolve(origin,destination, other.Bounds);
 			if (result != null) result.Box = other;
@@ -37,9 +37,9 @@
 			return result;
 		}
 
-		public static Hit Resolve(RectangleF origin, RectangleF destination, RectangleF other)
+		public static Hit Resolve(Rect origin, Rect destination, Rect other)
 		{
-			var broadphaseArea = RectangleF.Union(origin,destination);
+			var broadphaseArea = Rect.Union(origin,destination);
 
 			if (broadphaseArea.Intersects(other) || broadphaseArea.Contains(other))
 			{
@@ -49,12 +49,12 @@
 			return null;
 		}
 
-		public static Hit Resolve(Vector2 origin, Vector2 destination, RectangleF other)
+		public static Hit Resolve(Vector2 origin, Vector2 destination, Rect other)
 		{
 			var min = Vector2.Min(origin,destination);
 			var size = Vector2.Max(origin, destination) - min;
 
-			var broadphaseArea = new RectangleF(min, size);
+			var broadphaseArea = new Rect(min, size);
 
 			if (broadphaseArea.Intersects(other) || broadphaseArea.Contains(other))
 			{
@@ -83,7 +83,7 @@
 
 		#endregion
 
-		private static Tuple<Vector2, Vector2> PushOutside(Vector2 origin, RectangleF other)
+		private static Tuple<Vector2, Vector2> PushOutside(Vector2 origin, Rect other)
 		{
 			var position = origin;
 			var normal = Vector2.Zero;
@@ -119,7 +119,7 @@
 			return new Tuple<Vector2, Vector2>(position,normal);
 		}
 
-		private static (Vector2 position, Vector2 normal) PushOutside(RectangleF origin, RectangleF other)
+		private static (Vector2 position, Vector2 normal) PushOutside(Rect origin, Rect other)
 		{
 			var position = origin.Location;
 			var normal = Vector2.Zero;
@@ -155,7 +155,7 @@
 			return (position, normal);
 		}
 
-		private static Hit ResolveNarrow(RectangleF origin, RectangleF destination, RectangleF other)
+		private static Hit ResolveNarrow(Rect origin, Rect destination, Rect other)
 		{
 			// if starts inside, push it outside at the neareast place
 			if (other.Contains(origin) || other.Intersects(origin))
@@ -241,7 +241,7 @@
 			return result;
 		}
 
-		private static Hit ResolveNarrow(Vector2 origin, Vector2 destination, RectangleF other)
+		private static Hit ResolveNarrow(Vector2 origin, Vector2 destination, Rect other)
 		{
 			// if starts inside, push it outside at the neareast place
 			if (other.Contains(origin))
@@ -334,7 +334,6 @@
 
 			return (invEntry.Y < 0.0f || (Math.Abs(invEntry.Y) < Constants.Threshold && invExit.Y < 0)) ? Vector2.UnitY : -Vector2.UnitY;
 		}
-				                            
 
 		public bool IsNearest(IHit than, Vector2 origin)
 		{

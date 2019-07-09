@@ -15,11 +15,11 @@
 
 		public bool HasCollided { get { return this.Hits.Any(); } }
 
-		public RectangleF Origin { get; set; }
+		public Rect Origin { get; set; }
 
-		public RectangleF Destination { get; set; }
+		public Rect Destination { get; set; }
 
-		public RectangleF Goal { get; set; }
+		public Rect Goal { get; set; }
 	}
 }
 

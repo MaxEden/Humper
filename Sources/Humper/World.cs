@@ -13,7 +13,7 @@
 			this._broadPhase = broadPhase;
 		}
 
-		public RectangleF Bounds => _broadPhase.Bounds;
+		public Rect Bounds => _broadPhase.Bounds;
 
 		#region Boxes
 
@@ -21,7 +21,7 @@
 
 		public int Boxes {get;private set;}
 
-		public Box Create(RectangleF area)
+		public Box Create(Rect area)
 		{
 			var box = new Box(this, area);
 			this._broadPhase.Add(box);
@@ -29,7 +29,7 @@
 			return box;
 		}
 
-		public IEnumerable<Box> Find(RectangleF area)
+		public IEnumerable<Box> Find(Rect area)
 		{
 			return this._broadPhase.QueryBoxes(area);
 		}
@@ -40,7 +40,7 @@
 			return this._broadPhase.Remove(box);
 		}
 
-		public void Update(Box box, RectangleF from)
+		public void Update(Box box, Rect from)
 		{
 			this._broadPhase.Update(box, from);
 		}
@@ -51,7 +51,7 @@
 
 		public IHit Hit(Vector2 point, IEnumerable<Box> ignoring = null)
 		{
-			var boxes = this._broadPhase.QueryBoxes(new RectangleF(point,Vector2.Zero));
+			var boxes = this._broadPhase.QueryBoxes(new Rect(point,Vector2.Zero));
 
 			if (ignoring != null)
 			{
@@ -76,7 +76,7 @@
 			var min = Vector2.Min(origin, destination);
 			var max = Vector2.Max(origin, destination);
 
-			var wrap = RectangleF.FromPoints(min, max);
+			var wrap = Rect.FromPoints(min, max);
 			var boxes = this.Find(wrap);
 
 			if (ignoring != null)
@@ -99,9 +99,9 @@
 			return nearest;
 		}
 
-		public IHit Hit(RectangleF origin, RectangleF destination, IEnumerable<Box> ignoring = null)
+		public IHit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
 		{
-			var wrap = new RectangleF(origin, destination);
+			var wrap = new Rect(origin, destination);
 			var boxes = this.Find(wrap);
 
 			if (ignoring != null)
@@ -131,7 +131,7 @@
 		public IMovement Simulate(Box box, Vector2 destination, Func<ICollision, ICollisionResponse> filter)
 		{
 			var origin = box.Bounds;
-			var goal = new RectangleF(destination, box.Bounds.Size);
+			var goal = new Rect(destination, box.Bounds.Size);
 
 			var hits = new List<IHit>();
 
@@ -146,7 +146,7 @@
 			return result;
 		}
 
-		private RectangleF Simulate(List<IHit> hits, List<Box> ignoring, Box box, RectangleF origin, RectangleF destination, Func<ICollision, ICollisionResponse> filter)
+		private Rect Simulate(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, Func<ICollision, ICollisionResponse> filter)
 		{
 			var nearest = this.Hit(origin, destination, ignoring);
 				
@@ -154,7 +154,7 @@
 			{
 				hits.Add(nearest);
 
-				var impact = new RectangleF(nearest.Position, origin.Size);
+				var impact = new Rect(nearest.Position, origin.Size);
 				var collision = new Collision() { Box = box, Hit = nearest, Goal = destination, Origin = origin };
 				var response = filter(collision);
 
@@ -172,7 +172,7 @@
 
 		#region Diagnostics
 
-		public void DrawDebug(RectangleF area, Action<int,int,int,int,float> drawCell, Action<Box> drawBox, Action<string,int,int, float> drawString)
+		public void DrawDebug(Rect area, Action<int,int,int,int,float> drawCell, Action<Box> drawBox, Action<string,int,int, float> drawString)
 		{
 			// Drawing boxes
 			var boxes = _broadPhase.QueryBoxes(area);

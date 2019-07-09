@@ -16,10 +16,10 @@ namespace Humper
         {
             public Cell(int x, int y, float cellSize)
             {
-                Bounds = new RectangleF(x * cellSize, y * cellSize, cellSize, cellSize);
+                Bounds = new Rect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
 
-            public RectangleF Bounds { get; private set; }
+            public Rect Bounds { get; private set; }
 
             public IEnumerable<Box> Children => children;
 
@@ -68,7 +68,7 @@ namespace Humper
 
         private Cell[,] Cells { get; set; }
 
-        public IEnumerable<Cell> QueryCells(RectangleF area)
+        public IEnumerable<Cell> QueryCells(Rect area)
         {
             var minX = (int)(area.Left / CellSize);
             var minY = (int)(area.Top / CellSize);
@@ -101,7 +101,7 @@ namespace Humper
             return result;
 
         }
-        public void DrawDebug(RectangleF area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
+        public void DrawDebug(Rect area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
         {
             // Drawing cells
             var cells = QueryCells(area);
@@ -114,12 +114,12 @@ namespace Humper
             }
         }
 
-        public IEnumerable<Box> QueryBoxes(RectangleF area)
+        public IEnumerable<Box> QueryBoxes(Rect area)
         {
             var cells = QueryCells(area);
             return cells.SelectMany((cell) => cell.Children).Distinct();
         }
-        public RectangleF Bounds => new RectangleF(0,0,Width*CellSize,Height*CellSize);
+        public Rect Bounds => new Rect(0,0,Width*CellSize,Height*CellSize);
 
         public void Add(Box box)
         {
@@ -132,7 +132,7 @@ namespace Humper
             }
         }
 
-        public void Update(Box box, RectangleF from)
+        public void Update(Box box, Rect from)
         {
             var fromCells = QueryCells(from);
             var removed = false;
@@ -162,14 +162,5 @@ namespace Humper
         {
             return string.Format("[Grid: Width={0}, Height={1}, Columns={2}, Rows={3}]", Width, Height, Columns, Rows);
         }
-    }
-    public interface IBroadPhase {
-        void Add(Box box);
-        IEnumerable<Box> QueryBoxes(RectangleF area);
-        RectangleF Bounds { get; }
-        bool Remove(Box box);
-        void Update(Box box, RectangleF @from);
-        IEnumerable<Grid.Cell> QueryCells(RectangleF area);
-        void DrawDebug(RectangleF area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString);
     }
 }

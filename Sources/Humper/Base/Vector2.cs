@@ -871,5 +871,9 @@ namespace Humper.Base
 		}
 
 		#endregion
+		public static Vector2 Abs(Vector2 v)
+		{
+			return new Vector2(Math.Abs(v.X), Math.Abs(v.Y));
+		}
 	}
 }

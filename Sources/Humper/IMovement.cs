@@ -9,11 +9,11 @@
 
 		bool HasCollided { get; }
 
-		RectangleF Origin { get; }
+		Rect Origin { get; }
 
-		RectangleF Goal { get; }
+		Rect Goal { get; }
 
-		RectangleF Destination { get; }
+		Rect Destination { get; }
 	}
 }
 

@@ -9,17 +9,17 @@ namespace Humper.Sample.Basic
 	{
 		private static Texture2D pixel;
 
-		public static Rectangle ToRectangle(this RectangleF r)
+		public static Rectangle ToRectangle(this Rect r)
 		{
 			return new Rectangle((int)r.X,(int)r.Y,(int)r.Width,(int)r.Height);
 		}
 
-		public static void Draw(this SpriteBatch spriteBatch, RectangleF rect, Color color)
+		public static void Draw(this SpriteBatch spriteBatch, Rect rect, Color color)
 		{
 			spriteBatch.Draw(rect.ToRectangle(), color);
 		}
 
-		public static void Draw(this SpriteBatch spriteBatch, RectangleF rect, Color color, float fillOpacity)
+		public static void Draw(this SpriteBatch spriteBatch, Rect rect, Color color, float fillOpacity)
 		{
 			spriteBatch.Draw(rect.ToRectangle(), color, fillOpacity);
 		}

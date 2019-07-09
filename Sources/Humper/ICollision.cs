@@ -20,13 +20,13 @@
 		/// Gets the origin of the box move.
 		/// </summary>
 		/// <value>The origin.</value>
-		RectangleF Origin { get; }
+		Rect Origin { get; }
 
 		/// <summary>
 		/// Gets the goal position of the box move.
 		/// </summary>
 		/// <value>The goal.</value>
-		RectangleF Goal { get; }
+		Rect Goal { get; }
 
 		/// <summary>
 		/// Gets information about the impact point.

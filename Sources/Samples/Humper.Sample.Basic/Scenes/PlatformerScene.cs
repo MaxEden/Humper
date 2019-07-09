@@ -74,23 +74,23 @@ namespace Humper.Sample.Basic
 
 			SpawnPlayer();
 
-			platform = World.Create(new RectangleF(0, 200, 100, 20)).AddTags(Tags.Group4);
+			platform = World.Create(new Rect(0, 200, 100, 20)).AddTags(Tags.Group4);
 
 			crates = new[]
 			{
-				new Crate(World.Create(new RectangleF(150, 220, 40, 40))),
-				new Crate(World.Create(new RectangleF(210, 220, 40, 40))),
+				new Crate(World.Create(new Rect(150, 220, 40, 40))),
+				new Crate(World.Create(new Rect(210, 220, 40, 40))),
 			};
 
 			// Map
-			World.Create(new RectangleF(0, 300, 400, 20)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(380, 320, 20, 80)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(380, 400, 300, 20)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(420, 200, 200, 20)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(680, 220, 20, 200)).AddTags(Tags.Group2);
-			World.Create(new RectangleF(680, 200, 200, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(0, 300, 400, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(380, 320, 20, 80)).AddTags(Tags.Group2);
+			World.Create(new Rect(380, 400, 300, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(420, 200, 200, 20)).AddTags(Tags.Group2);
+			World.Create(new Rect(680, 220, 20, 200)).AddTags(Tags.Group2);
+			World.Create(new Rect(680, 200, 200, 20)).AddTags(Tags.Group2);
 
-			World.Create(new RectangleF(400, 300, 280, 100)).AddTags(Tags.Group3);
+			World.Create(new Rect(400, 300, 280, 100)).AddTags(Tags.Group3);
 		}
 
 		private void SpawnPlayer()
@@ -98,7 +98,7 @@ namespace Humper.Sample.Basic
 			if(player1 != null)
 				World.Remove(player1);
 
-			player1 = World.Create(new RectangleF(50, 50, 10, 24)).AddTags(Tags.Group1);
+			player1 = World.Create(new Rect(50, 50, 10, 24)).AddTags(Tags.Group1);
 			velocity = Vector2.Zero;
 		}
 
