@@ -8,9 +8,9 @@ namespace Humper
 		{
 		}
 
-		public IBox Box { get; set; }
+		public Box Box { get; set; }
 
-		public IBox Other { get { return this.Hit?.Box; } }
+		public Box Other { get { return this.Hit?.Box; } }
 
 		public RectangleF Origin { get; set; }
 

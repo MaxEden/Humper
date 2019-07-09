@@ -13,13 +13,13 @@ namespace Humper.Sample.Basic
 	{
 		public class Crate
 		{
-			public Crate(IBox box)
+			public Crate(Box box)
 			{
 				this.box = box.AddTags(Tags.Group5);
 				this.box.Data = this;
 			}
 
-			private IBox box;
+			private Box box;
 
 			public Vector2 velocity;
 
@@ -62,7 +62,7 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private IBox player1, platform;
+		private Box player1, platform;
 
 		private Crate[] crates;
 
@@ -70,50 +70,50 @@ namespace Humper.Sample.Basic
 
 		public override void Initialize()
 		{
-			this.World = new World(1024, 700);
+			World = new World(new Grid(1024, 700));
 
-			this.SpawnPlayer();
+			SpawnPlayer();
 
-			this.platform = this.World.Create(new RectangleF(0, 200, 100, 20)).AddTags(Tags.Group4);
+			platform = World.Create(new RectangleF(0, 200, 100, 20)).AddTags(Tags.Group4);
 
-			this.crates = new[]
+			crates = new[]
 			{
-				new Crate(this.World.Create(new RectangleF(150, 220, 40, 40))),
-				new Crate(this.World.Create(new RectangleF(210, 220, 40, 40))),
+				new Crate(World.Create(new RectangleF(150, 220, 40, 40))),
+				new Crate(World.Create(new RectangleF(210, 220, 40, 40))),
 			};
 
 			// Map
-			this.World.Create(new RectangleF(0, 300, 400, 20)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(380, 320, 20, 80)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(380, 400, 300, 20)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(420, 200, 200, 20)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(680, 220, 20, 200)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(680, 200, 200, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(0, 300, 400, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(380, 320, 20, 80)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(380, 400, 300, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(420, 200, 200, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(680, 220, 20, 200)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(680, 200, 200, 20)).AddTags(Tags.Group2);
 
-			this.World.Create(new RectangleF(400, 300, 280, 100)).AddTags(Tags.Group3);
+			World.Create(new RectangleF(400, 300, 280, 100)).AddTags(Tags.Group3);
 		}
 
 		private void SpawnPlayer()
 		{
-			if(this.player1 != null)
-				this.World.Remove(this.player1);
+			if(player1 != null)
+				World.Remove(player1);
 
-			this.player1 = this.World.Create(new RectangleF(50, 50, 10, 24)).AddTags(Tags.Group1);
-			this.velocity = Vector2.Zero;
+			player1 = World.Create(new RectangleF(50, 50, 10, 24)).AddTags(Tags.Group1);
+			velocity = Vector2.Zero;
 		}
 
 		public override void Update(GameTime time)
 		{
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
 
-			UpdatePlatform(this.platform, delta);
+			UpdatePlatform(platform, delta);
 			 
 			foreach (var crate in crates)
 			{
 				crate.Update(delta);
 			}
 
-			UpdatePlayer(this.player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
+			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
 		}
 
 		private Vector2 velocity = Vector2.Zero;
@@ -121,17 +121,17 @@ namespace Humper.Sample.Basic
 		private float timeInRed;
 		private bool onPlatform;
 
-		private void UpdatePlatform(IBox platform, float delta)
+		private void UpdatePlatform(Box platform, float delta)
 		{
 			if ((platform.Bounds.X < 50 && platformVelocity.X < 0) || (platform.Bounds.X > 300 && platformVelocity.X > 0))
 			{
-				this.platformVelocity.X *= -1;
+				platformVelocity.X *= -1;
 			}
 
-			platform.Move(new Vector2(platform.Bounds.X + this.platformVelocity.X * delta, platform.Bounds.Y), (collistion) => CollisionResponses.None);
+			platform.Move(new Vector2(platform.Bounds.X + platformVelocity.X * delta, platform.Bounds.Y), (collistion) => CollisionResponses.None);
 		}
 
-		private void UpdatePlayer(IBox player, float delta, Keys left, Keys up, Keys right, Keys down)
+		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
 		{
 			velocity.Y += delta * 0.001f;
 			velocity.X = 0;

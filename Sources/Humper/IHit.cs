@@ -11,7 +11,7 @@
 		/// Gets the collided box.
 		/// </summary>
 		/// <value>The box.</value>
-		IBox Box { get; }
+		Box Box { get; }
 
 		/// <summary>
 		/// Gets the normal vector of the collided box side.

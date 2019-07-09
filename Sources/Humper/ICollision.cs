@@ -8,13 +8,13 @@
 		/// Gets the box that is moving and collides with an other one.
 		/// </summary>
 		/// <value>The box.</value>
-		IBox Box { get; }
+		Box Box { get; }
 
 		/// <summary>
 		/// Gets the other box than being collided by the moving box.
 		/// </summary>
 		/// <value>The other.</value>
-		IBox Other { get; }
+		Box Other { get; }
 
 		/// <summary>
 		/// Gets the origin of the box move.

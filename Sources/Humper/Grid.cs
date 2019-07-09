@@ -1,4 +1,6 @@
-﻿namespace Humper
+﻿using System.Collections;
+
+namespace Humper
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +10,7 @@
     /// <summary>
     /// Basic spacial hashing of world's boxes.
     /// </summary>
-    public class Grid
+    public class Grid: IBroadPhase
     {
         public class Cell
         {
@@ -19,21 +21,21 @@
 
             public RectangleF Bounds { get; private set; }
 
-            public IEnumerable<IBox> Children => children;
+            public IEnumerable<Box> Children => children;
 
-            private List<IBox> children = new List<IBox>();
+            private HashSet<Box> children = new HashSet<Box>();
 
-            public void Add(IBox box)
+            public void Add(Box box)
             {
                 children.Add(box);
             }
 
-            public bool Contains(IBox box)
+            public bool Contains(Box box)
             {
                 return children.Contains(box);
             }
 
-            public bool Remove(IBox box)
+            public bool Remove(Box box)
             {
                 return children.Remove(box);
             }
@@ -44,13 +46,13 @@
             }
         }
 
-        public Grid(int width, int height, float cellSize)
+        public Grid(float width, float height, float cellSize = 64)
         {
-            Cells = new Cell[width, height];
+            Cells = new Cell[(int)(width/cellSize)+1, (int)(height/cellSize)+1];
             CellSize = cellSize;
         }
 
-        public float CellSize { get; set; }
+        private float CellSize { get; set; }
 
         #region Size
 
@@ -64,7 +66,7 @@
 
         #endregion
 
-        public Cell[,] Cells { get; private set; }
+        private Cell[,] Cells { get; set; }
 
         public IEnumerable<Cell> QueryCells(RectangleF area)
         {
@@ -99,14 +101,27 @@
             return result;
 
         }
+        public void DrawDebug(RectangleF area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
+        {
+            // Drawing cells
+            var cells = QueryCells(area);
+            foreach (var cell in cells)
+            {
+                var count = cell.Count();
+                var alpha = count > 0 ? 1f : 0.4f;
+                drawCell((int)cell.Bounds.X, (int)cell.Bounds.Y, (int)cell.Bounds.Width, (int)cell.Bounds.Height, alpha);
+                drawString(count.ToString(), (int)cell.Bounds.Center.X, (int)cell.Bounds.Center.Y,alpha);
+            }
+        }
 
-        public IEnumerable<IBox> QueryBoxes(RectangleF area)
+        public IEnumerable<Box> QueryBoxes(RectangleF area)
         {
             var cells = QueryCells(area);
             return cells.SelectMany((cell) => cell.Children).Distinct();
         }
+        public RectangleF Bounds => new RectangleF(0,0,Width*CellSize,Height*CellSize);
 
-        public void Add(IBox box)
+        public void Add(Box box)
         {
             var cells = QueryCells(box.Bounds);
 
@@ -117,7 +132,7 @@
             }
         }
 
-        public void Update(IBox box, RectangleF from)
+        public void Update(Box box, RectangleF from)
         {
             var fromCells = QueryCells(from);
             var removed = false;
@@ -130,7 +145,7 @@
                 Add(box);
         }
 
-        public bool Remove(IBox box)
+        public bool Remove(Box box)
         {
             var cells = this.QueryCells(box.Bounds);
 
@@ -147,5 +162,14 @@
         {
             return string.Format("[Grid: Width={0}, Height={1}, Columns={2}, Rows={3}]", Width, Height, Columns, Rows);
         }
+    }
+    public interface IBroadPhase {
+        void Add(Box box);
+        IEnumerable<Box> QueryBoxes(RectangleF area);
+        RectangleF Bounds { get; }
+        bool Remove(Box box);
+        void Update(Box box, RectangleF @from);
+        IEnumerable<Grid.Cell> QueryCells(RectangleF area);
+        void DrawDebug(RectangleF area, Action<int, int, int, int, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString);
     }
 }

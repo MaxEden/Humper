@@ -21,7 +21,7 @@ namespace Humper.Sample.Basic
 		{
 			graphics = new GraphicsDeviceManager(this);
 			Content.RootDirectory = "Content";
-			this.Window.AllowUserResizing = true;
+			Window.AllowUserResizing = true;
 			_stopwatch = new Stopwatch();
 		}
 
@@ -33,7 +33,7 @@ namespace Humper.Sample.Basic
 		/// </summary>
 		protected override void Initialize()
 		{
-			this.NextScene();
+			NextScene();
 
 			base.Initialize();
 
@@ -59,15 +59,15 @@ namespace Humper.Sample.Basic
 		{
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
-			this.font = Content.Load<SpriteFont>("font");
+			font = Content.Load<SpriteFont>("font");
 		}
 
 		private void NextScene()
 		{
-			this.sceneIndex = (this.sceneIndex + 1) % this.scenes.Length;
-			this.scene = (IScene) Activator.CreateInstance(this.scenes[this.sceneIndex]);
-			this.scene.LoadContent(this.Content);
-			this.scene.Initialize();
+			sceneIndex = (sceneIndex + 1) % scenes.Length;
+			scene = (IScene) Activator.CreateInstance(scenes[sceneIndex]);
+			scene.LoadContent(Content);
+			scene.Initialize();
 		}
 
 		private KeyboardState state;
@@ -87,11 +87,11 @@ namespace Humper.Sample.Basic
 				Exit();
 #endif
 			if (Keyboard.GetState().IsKeyDown(Keys.Enter) && state.IsKeyUp(Keys.Enter))
-				this.NextScene();
+				NextScene();
 			state = Keyboard.GetState();
 
 			//_stopwatch.Restart();
-			this.scene.Update(gameTime);
+			scene.Update(gameTime);
 			//_stopwatch.Stop();
 
 			base.Update(gameTime);
@@ -110,10 +110,10 @@ namespace Humper.Sample.Basic
 
 			spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
 
-			this.scene.Draw(spriteBatch);
+			scene.Draw(spriteBatch);
 
-			spriteBatch.DrawString(this.font, this.scene.Message, new Vector2(20, 20), new Color(Color.White, 0.5f));
-			spriteBatch.DrawString(this.font, $"ms:{_stopwatch.ElapsedMilliseconds} fps:{1000/(_stopwatch.ElapsedMilliseconds + 0.0001f)} monogame {1 / gameTime.ElapsedGameTime.TotalSeconds:##.0}", 
+			spriteBatch.DrawString(font, scene.Message, new Vector2(20, 20), new Color(Color.White, 0.5f));
+			spriteBatch.DrawString(font, $"ms:{_stopwatch.ElapsedMilliseconds} fps:{1000/(_stopwatch.ElapsedMilliseconds + 0.0001f)} monogame {1 / gameTime.ElapsedGameTime.TotalSeconds:##.0}", 
 			                       new Vector2(20, 80), new Color(Color.Red, 0.5f));
 
 			spriteBatch.End();

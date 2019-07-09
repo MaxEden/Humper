@@ -17,13 +17,13 @@ namespace Humper.Sample.Basic
 		{
 			public static Random random = new Random();
 
-			public Particle(IBox box)
+			public Particle(Box box)
 			{
-				this.Box = box;
-				this.Velocity = new Vector2((float)random.NextDouble() * 0.1f, 0);
+				Box = box;
+				Velocity = new Vector2((float)random.NextDouble() * 0.1f, 0);
 			}
 
-			public IBox Box { get; set; }
+			public Box Box { get; set; }
 
 			public Vector2 Velocity { get; set; }
 
@@ -31,7 +31,7 @@ namespace Humper.Sample.Basic
 			{
 				Velocity = Velocity + Vector2.UnitY * delta * 0.001f;
 
-				var move = this.Box.Move(
+				var move = Box.Move(
 					delta*Velocity + Box.Bounds.Location, (collision) =>
 				{
 					return CollisionResponses.Bounce;
@@ -55,21 +55,21 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private IBox player1;
+		private Box player1;
 
 		private Vector2 platformVelocity = Vector2.UnitX * 0.05f;
 
 		public override void Initialize()
 		{
-			this.World = new World(1024, 700);
+			World = new World(new Grid(1024, 700));
 
-			this.SpawnPlayer();
+			SpawnPlayer();
 
 			// Map
-			this.World.Create(new RectangleF(0, 0, 1024, 20)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(0, 20, 20, 660)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(1004, 20, 20, 660)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(0, 680, 1024, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(0, 0, 1024, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(0, 20, 20, 660)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(1004, 20, 20, 660)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
 			int maxBoxes = 500;
 			int width = 2;
@@ -77,13 +77,13 @@ namespace Humper.Sample.Basic
 			{
 				for(int y = 40; y < 500; y+= width*5)
 				{
-					var box = this.World.Create(new RectangleF(
+					var box = World.Create(new RectangleF(
 						                            x,
 						                            y,
 						                            (float)(Particle.random.NextDouble()*width) + 0.001f,
 						                            (float)(Particle.random.NextDouble()*width) + 0.001f
 						)).AddTags(Tags.Group3);
-					this.particles.Add(new Particle(box));
+					particles.Add(new Particle(box));
 					if(World.Boxes>maxBoxes) return;
 				}
 			}
@@ -92,11 +92,11 @@ namespace Humper.Sample.Basic
 
 		private void SpawnPlayer()
 		{
-			if (this.player1 != null)
-				this.World.Remove(this.player1);
+			if (player1 != null)
+				World.Remove(player1);
 
-			this.player1 = this.World.Create(new RectangleF(50, 100, 50, 30)).AddTags(Tags.Group1);
-			this.velocity = Vector2.Zero;
+			player1 = World.Create(new RectangleF(50, 100, 50, 30)).AddTags(Tags.Group1);
+			velocity = Vector2.Zero;
 		}
 
 		public override void Update(GameTime time)
@@ -104,13 +104,13 @@ namespace Humper.Sample.Basic
 			
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
 
-			foreach (var p in this.particles)
+			foreach (var p in particles)
 			{
 				p.Update(delta);
 			}
 
 			return;
-			UpdatePlayer(this.player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
+			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
 		}
 
 		private Vector2 velocity = Vector2.Zero;
@@ -118,7 +118,7 @@ namespace Humper.Sample.Basic
 		private float timeInRed;
 		private List<Particle> particles = new List<Particle>();
 
-		private void UpdatePlayer(IBox player, float delta, Keys left, Keys up, Keys right, Keys down)
+		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
 		{
 			velocity.Y += delta * 0.001f;
 			velocity.X = 0;

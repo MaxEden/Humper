@@ -14,30 +14,30 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private IBox player1, player2;
+		private Box player1, player2;
 
 		public override void Initialize()
 		{
-			this.World = new World(1024, 700);
+			World = new World(new Grid(1024, 700));
 
-			this.player1 = this.World.Create(new RectangleF(50, 50, 24, 24)).AddTags(Tags.Group1);
-			this.player2 = this.World.Create(new RectangleF(100, 50, 24, 24)).AddTags(Tags.Group1);
+			player1 = World.Create(new RectangleF(50, 50, 24, 24)).AddTags(Tags.Group1);
+			player2 = World.Create(new RectangleF(100, 50, 24, 24)).AddTags(Tags.Group1);
 
 			// Map
-			this.World.Create(new RectangleF(100, 100, 150, 20)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(180, 140, 200, 200)).AddTags(Tags.Group2);
-			this.World.Create(new RectangleF(190, 20, 80, 400)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(100, 100, 150, 20)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(180, 140, 200, 200)).AddTags(Tags.Group2);
+			World.Create(new RectangleF(190, 20, 80, 400)).AddTags(Tags.Group2);
 		}
 
 		public override void Update(GameTime time)
 		{
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
 
-			UpdatePlayer(this.player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
-			UpdatePlayer(this.player2, delta, Keys.F, Keys.T, Keys.H, Keys.G);
+			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
+			UpdatePlayer(player2, delta, Keys.F, Keys.T, Keys.H, Keys.G);
 		}
 
-		private void UpdatePlayer(IBox player, float delta, Keys left, Keys up, Keys right, Keys down)
+		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
 		{
 			var velocity = Vector2.Zero;
 

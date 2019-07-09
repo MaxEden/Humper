@@ -28,9 +28,9 @@ namespace Humper.Sample.Basic
 
 		public virtual void Draw(SpriteBatch sb)
 		{
-			var b = this.World.Bounds;
-			this.spriteBatch = sb;
-			this.World.DrawDebug(b, DrawCell, DrawBox, DrawString);
+			var b = World.Bounds;
+			spriteBatch = sb;
+			World.DrawDebug(b, DrawCell, DrawBox, DrawString);
 		}
 
 		private void DrawCell(int x, int y, int w, int h, float alpha)
@@ -39,7 +39,7 @@ namespace Humper.Sample.Basic
 				spriteBatch.DrawStroke(new Rectangle(x, y, w, h), new Color(Color.White, alpha));
 		}
 
-		private void DrawBox(IBox box)
+		private void DrawBox(Box box)
 		{
 			Color color;
 
@@ -59,14 +59,14 @@ namespace Humper.Sample.Basic
 
 		public void LoadContent(ContentManager content)
 		{
-			this.font = content.Load<SpriteFont>("font");
+			font = content.Load<SpriteFont>("font");
 		}
 
 		private void DrawString(string message, int x, int y, float alpha)
 		{
-			var size = this.font.MeasureString(message);
+			var size = font.MeasureString(message);
 			if (Keyboard.GetState().IsKeyDown(Keys.Space))
-				spriteBatch.DrawString(this.font, message, new Vector2(x - size.X / 2, y - size.Y / 2), new Color(Color.White, alpha));
+				spriteBatch.DrawString(font, message, new Vector2(x - size.X / 2, y - size.Y / 2), new Color(Color.White, alpha));
 		}
 
 		public abstract void Initialize();

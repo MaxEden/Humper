@@ -8,53 +8,50 @@
 
 	public class World 
 	{
-		public World(float width, float height, float cellSize = 64)
+		public World(IBroadPhase broadPhase)
 		{
-			var iwidth = (int)Math.Ceiling(width / cellSize);
-			var iheight = (int)Math.Ceiling(height / cellSize);
-
-			this.grid = new Grid(iwidth, iheight, cellSize);
+			this._broadPhase = broadPhase;
 		}
 
-		public RectangleF Bounds => new RectangleF(0, 0, this.grid.Width , this.grid.Height);
+		public RectangleF Bounds => _broadPhase.Bounds;
 
 		#region Boxes
 
-		private Grid grid;
+		private IBroadPhase _broadPhase;
 
 		public int Boxes {get;private set;}
 
-		public IBox Create(RectangleF area)
+		public Box Create(RectangleF area)
 		{
 			var box = new Box(this, area);
-			this.grid.Add(box);
+			this._broadPhase.Add(box);
 			Boxes++;
 			return box;
 		}
 
-		public IEnumerable<IBox> Find(RectangleF area)
+		public IEnumerable<Box> Find(RectangleF area)
 		{
-			return this.grid.QueryBoxes(area);
+			return this._broadPhase.QueryBoxes(area);
 		}
 
-		public bool Remove(IBox box)
+		public bool Remove(Box box)
 		{
 			Boxes--;
-			return this.grid.Remove(box);
+			return this._broadPhase.Remove(box);
 		}
 
-		public void Update(IBox box, RectangleF from)
+		public void Update(Box box, RectangleF from)
 		{
-			this.grid.Update(box, from);
+			this._broadPhase.Update(box, from);
 		}
 
 		#endregion
 
 		#region Hits
 
-		public IHit Hit(Vector2 point, IEnumerable<IBox> ignoring = null)
+		public IHit Hit(Vector2 point, IEnumerable<Box> ignoring = null)
 		{
-			var boxes = this.grid.QueryBoxes(new RectangleF(point,Vector2.Zero));
+			var boxes = this._broadPhase.QueryBoxes(new RectangleF(point,Vector2.Zero));
 
 			if (ignoring != null)
 			{
@@ -74,7 +71,7 @@
 			return null;
 		}
 
-		public IHit Hit(Vector2 origin, Vector2 destination, IEnumerable<IBox> ignoring = null)
+		public IHit Hit(Vector2 origin, Vector2 destination, IEnumerable<Box> ignoring = null)
 		{
 			var min = Vector2.Min(origin, destination);
 			var max = Vector2.Max(origin, destination);
@@ -102,7 +99,7 @@
 			return nearest;
 		}
 
-		public IHit Hit(RectangleF origin, RectangleF destination, IEnumerable<IBox> ignoring = null)
+		public IHit Hit(RectangleF origin, RectangleF destination, IEnumerable<Box> ignoring = null)
 		{
 			var wrap = new RectangleF(origin, destination);
 			var boxes = this.Find(wrap);
@@ -142,14 +139,14 @@
 			{
 				Origin = origin,
 				Goal = goal,
-				Destination = this.Simulate(hits, new List<IBox>() { box }, box, origin, goal, filter),
+				Destination = this.Simulate(hits, new List<Box>() { box }, box, origin, goal, filter),
 				Hits = hits,
 			};
 
 			return result;
 		}
 
-		private RectangleF Simulate(List<IHit> hits, List<IBox> ignoring, Box box, RectangleF origin, RectangleF destination, Func<ICollision, ICollisionResponse> filter)
+		private RectangleF Simulate(List<IHit> hits, List<Box> ignoring, Box box, RectangleF origin, RectangleF destination, Func<ICollision, ICollisionResponse> filter)
 		{
 			var nearest = this.Hit(origin, destination, ignoring);
 				
@@ -175,24 +172,16 @@
 
 		#region Diagnostics
 
-		public void DrawDebug(RectangleF area, Action<int,int,int,int,float> drawCell, Action<IBox> drawBox, Action<string,int,int, float> drawString)
+		public void DrawDebug(RectangleF area, Action<int,int,int,int,float> drawCell, Action<Box> drawBox, Action<string,int,int, float> drawString)
 		{
 			// Drawing boxes
-			var boxes = this.grid.QueryBoxes(area);
+			var boxes = _broadPhase.QueryBoxes(area);
 			foreach (var box in boxes)
 			{
 				drawBox(box);
 			}
 
-			// Drawing cells
-			var cells = this.grid.QueryCells(area);
-			foreach (var cell in cells)
-			{
-				var count = cell.Count();
-				var alpha = count > 0 ? 1f : 0.4f;
-				drawCell((int)cell.Bounds.X, (int)cell.Bounds.Y, (int)cell.Bounds.Width, (int)cell.Bounds.Height, alpha);
-				drawString(count.ToString(), (int)cell.Bounds.Center.X, (int)cell.Bounds.Center.Y,alpha);
-			}
+			_broadPhase.DrawDebug(area, drawCell, drawBox, drawString);
 		}
 
 		#endregion

@@ -5,7 +5,7 @@
     using Base;
     using Responses;
 
-    public class Box : IBox
+    public class Box
     {
         #region Constructors 
 
@@ -78,7 +78,7 @@
 
         private Enum tags;
 
-        public IBox AddTags(params Enum[] newTags)
+        public Box AddTags(params Enum[] newTags)
         {
             foreach(var tag in newTags)
             {
@@ -88,7 +88,7 @@
             return this;
         }
 
-        public IBox RemoveTags(params Enum[] newTags)
+        public Box RemoveTags(params Enum[] newTags)
         {
             foreach(var tag in newTags)
             {

@@ -11,7 +11,7 @@
 			this.Amount = 1.0f;
 		}
 
-		public IBox Box { get; set; }
+		public Box Box { get; set; }
 
 		public Vector2 Normal { get; set; }
 
@@ -23,14 +23,14 @@
 
 		#region Public functions
 
-		public static IHit Resolve(RectangleF origin, RectangleF destination, IBox other)
+		public static IHit Resolve(RectangleF origin, RectangleF destination, Box other)
 		{
 			var result = Resolve(origin,destination, other.Bounds);
 			if (result != null) result.Box = other;
 			return result;
 		}
 
-		public static IHit Resolve(Vector2 origin, Vector2 destination, IBox other)
+		public static IHit Resolve(Vector2 origin, Vector2 destination, Box other)
 		{
 			var result = Resolve(origin, destination, other.Bounds);
 			if (result != null) result.Box = other;
@@ -64,7 +64,7 @@
 			return null;
 		}
 
-		public static IHit Resolve(Vector2 point, IBox other)
+		public static IHit Resolve(Vector2 point, Box other)
 		{
 			if (other.Bounds.Contains(point))
 			{
