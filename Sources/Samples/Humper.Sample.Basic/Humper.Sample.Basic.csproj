@@ -64,6 +64,10 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Mandarin\Mandarin.Common\Mandarin.Common.csproj">
+      <Project>{FE1A513F-CFAC-4EFF-8DF4-37E42CF32ACC}</Project>
+      <Name>Mandarin.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Humper\Humper.csproj">
       <Project>{1DD7D455-8710-44A5-B275-8606EB78D80E}</Project>
       <Name>Humper</Name>

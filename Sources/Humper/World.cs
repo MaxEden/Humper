@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Humper.Base;
 using Humper.Responses;
+using Mandarin.Common.Misc;
 
 namespace Humper
 {
@@ -91,7 +92,7 @@ namespace Humper
             var min = Vector2.Min(origin, destination);
             var max = Vector2.Max(origin, destination);
 
-            var wrap = Rect.FromPoints(min, max);
+            var wrap = Rect.FromMinMax(min, max);
             var boxes = Find(wrap);
 
             if(ignoring != null)
@@ -116,7 +117,7 @@ namespace Humper
 
         public IHit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
         {
-            var wrap = new Rect(origin, destination);
+            var wrap = Rect.Union(origin, destination);
             var boxes = Find(wrap);
 
             if(ignoring != null)
@@ -130,7 +131,7 @@ namespace Humper
             {
                 var hit = Humper.Hit.Resolve(origin, destination, other);
 
-                if(hit != null && (nearest == null || hit.IsNearest(nearest, origin.Location)))
+                if(hit != null && (nearest == null || hit.IsNearest(nearest, origin.Position)))
                 {
                     nearest = hit;
                 }

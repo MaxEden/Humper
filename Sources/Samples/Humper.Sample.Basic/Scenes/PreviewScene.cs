@@ -1,10 +1,13 @@
 ﻿using System;
 using Humper.Base;
 using Humper.Responses;
+using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Color = Microsoft.Xna.Framework.Color;
+using Vector2 = Mandarin.Common.Misc.Vector2;
 
 namespace Humper.Sample.Basic
 {
@@ -75,7 +78,7 @@ namespace Humper.Sample.Basic
 			if (previous.IsKeyUp(Keys.N) && state.IsKeyDown(Keys.N))
 			{
 				moveDestination = !moveDestination;
-				selected.Location = (moveDestination ? goal.Location : origin.Location) - selected.Size / 2;
+				selected.Position = (moveDestination ? goal.Position : origin.Position) - selected.Size / 2;
 			}
 
 			if (previous.IsKeyUp(Keys.R) && state.IsKeyDown(Keys.R))
@@ -88,22 +91,22 @@ namespace Humper.Sample.Basic
 
 			isMoving = state.IsKeyDown(Keys.Space);
 			var m = Mouse.GetState().Position;
-			var pos = new Base.Vector2(m.X, m.Y);
+			var pos = new Vector2(m.X, m.Y);
 			var size = isMoving ? 18 : 6;
 			cursor = new Rect(m.X - size/2, m.Y - size/2,size, size);
 
 
 			if (isMoving)
 			{
-				selected.Location = pos - selected.Size / 2;
+				selected.Position = pos - selected.Size / 2;
 				
 				if (moveDestination)
 				{
-					goal.Location = pos;
+					goal.Position = pos;
 				}
 				else
 				{
-					origin.Location = pos;
+					origin.Position = pos;
 				}
 			}
 
@@ -114,7 +117,7 @@ namespace Humper.Sample.Basic
 			if (hit != null && r != CollisionResponses.None)
 			{
 				collision = new Rect(hit.Position, origin.Size);
-				normal = new Rect(collision.Center + hit.Normal * 50, new Base.Vector2(5, 5));
+				normal = new Rect(collision.Center + hit.Normal * 50, new Vector2(5, 5));
 
 				// Destination
 				var collisionPoint = new Collision()

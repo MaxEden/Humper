@@ -1,15 +1,16 @@
 ﻿using Humper.Base;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Vector2 = Humper.Base.Vector2;
+using System;
+using Humper.Responses;
+using Microsoft.Xna.Framework.Input;
+using System.Linq;
+using System.Collections.Generic;
+using Mandarin.Common.Misc;
+using Vector2 = Mandarin.Common.Misc.Vector2;
 
 namespace Humper.Sample.Basic
 {
-	using System;
-	using Responses;
-	using Microsoft.Xna.Framework.Input;
-	using System.Linq;
-	using System.Collections.Generic;
 
 	public class ParticlesScene : WorldScene
 	{
@@ -29,10 +30,10 @@ namespace Humper.Sample.Basic
 
 			public void Update(float delta)
 			{
-				Velocity = Velocity + Vector2.UnitY * delta * 0.001f;
+				Velocity = Velocity + Vector2.up * delta * 0.001f;
 
 				var move = Box.Move(
-					delta*Velocity + Box.Bounds.Location, (collision) =>
+					delta*Velocity + Box.Bounds.Position, (collision) =>
 				{
 					return CollisionResponses.Bounce;
 				});
@@ -57,7 +58,7 @@ namespace Humper.Sample.Basic
 
 		private Box player1;
 
-		private Vector2 platformVelocity = Vector2.UnitX * 0.05f;
+		private Vector2 platformVelocity = Vector2.right * 0.05f;
 
 		public override void Initialize()
 		{
@@ -132,7 +133,7 @@ namespace Humper.Sample.Basic
 				velocity.Y -= 0.5f;
 
 			// Moving player
-			var move = player.Move(player.Bounds.Location + delta * velocity, (collision) =>
+			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) =>
 			{
 				return CollisionResponses.Slide;
 			});

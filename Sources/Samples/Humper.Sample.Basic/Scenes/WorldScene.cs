@@ -1,9 +1,11 @@
 ﻿using System;
 using Humper.Base;
+using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Color = Microsoft.Xna.Framework.Color;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace Humper.Sample.Basic

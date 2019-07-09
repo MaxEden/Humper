@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Humper.Base;
 using Humper.Responses;
+using Mandarin.Common.Misc;
 
 namespace Humper
 {
@@ -57,8 +57,7 @@ namespace Humper
         public IMovement Move(Vector2 destination, Func<ICollision, ICollisionResponse> filter)
         {
             var movement = Simulate(destination, filter);
-            bounds.X = movement.Destination.X;
-            bounds.Y = movement.Destination.Y;
+            bounds = movement.Destination;
             world.Update(this, movement.Origin);
             return movement;
         }
@@ -66,8 +65,7 @@ namespace Humper
         public IMovement Move(Vector2 destination, Func<ICollision, CollisionResponses> filter)
         {
             var movement = Simulate(destination, filter);
-            bounds.X = movement.Destination.X;
-            bounds.Y = movement.Destination.Y;
+            bounds = movement.Destination;
             world.Update(this, movement.Origin);
             return movement;
         }

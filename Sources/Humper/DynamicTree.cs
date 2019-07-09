@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Humper.Base;
+using Mandarin.Common.Misc;
 
 namespace Humper
 {
@@ -149,7 +150,7 @@ namespace Humper
         }
         void IBroadPhase.Update(Box box, Rect from)
         {
-            MoveProxy((Node)box.BroadPhaseData, from, box.Bounds.Location - from.Location);
+            MoveProxy((Node)box.BroadPhaseData, from, box.Bounds.Position - from.Position);
         }
         void IBroadPhase.DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
         {
@@ -242,7 +243,7 @@ namespace Humper
                     continue;
                 }
 
-                if(node.Rect.Intersects(rect))
+                if(node.Rect.Overlaps(rect))
                 {
                     if(node.IsLeaf())
                     {
@@ -270,7 +271,7 @@ namespace Humper
         /// </summary>
         /// <param name="callback">A callback class that is called for each proxy that is hit by the ray.</param>
         /// <param name="input">The ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).</param>
-        public void RayCast(Func<RayCastInput, Node, float> callback, RayCastInput input)
+        public void RayCast(Func<Rect.RayCastInput, Node, float> callback, Rect.RayCastInput input)
         {
             var p1 = input.From;
             var p2 = input.To;
@@ -305,7 +306,7 @@ namespace Humper
                     continue;
                 }
 
-                if(node.Rect.Intersects(segmentRect) == false)
+                if(node.Rect.Overlaps(segmentRect) == false)
                 {
                     continue;
                 }
@@ -322,7 +323,7 @@ namespace Humper
 
                 if(node.IsLeaf())
                 {
-                    RayCastInput subInput;
+                    Rect.RayCastInput subInput;
                     subInput.From = input.From;
                     subInput.To = input.To;
                     subInput.MaxFraction = maxFraction;

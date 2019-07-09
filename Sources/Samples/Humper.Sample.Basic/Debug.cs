@@ -1,7 +1,9 @@
 ﻿using System;
 using Humper.Base;
+using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace Humper.Sample.Basic
 {
@@ -11,7 +13,7 @@ namespace Humper.Sample.Basic
 
 		public static Rectangle ToRectangle(this Rect r)
 		{
-			return new Rectangle((int)r.X,(int)r.Y,(int)r.Width,(int)r.Height);
+			return new Rectangle((int)r.X,-(int)r.Y,(int)r.Width,(int)r.Height);
 		}
 
 		public static void Draw(this SpriteBatch spriteBatch, Rect rect, Color color)

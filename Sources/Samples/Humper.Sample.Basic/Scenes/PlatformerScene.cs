@@ -1,6 +1,7 @@
 ﻿using Humper.Base;
+using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
-using Vector2 = Humper.Base.Vector2;
+using Vector2 = Mandarin.Common.Misc.Vector2;
 
 namespace Humper.Sample.Basic
 {
@@ -33,7 +34,7 @@ namespace Humper.Sample.Basic
 				if (inWater)
 					velocity.Y *= 0.5f;
 
-				var move = box.Move(box.Bounds.Location + delta * velocity, (collision) =>
+				var move = box.Move(box.Bounds.Position + delta * velocity, (collision) =>
 				{
 					if (collision.Other.HasTag(Tags.Group3))
 					{
@@ -66,7 +67,7 @@ namespace Humper.Sample.Basic
 
 		private Crate[] crates;
 
-		private Vector2 platformVelocity = Vector2.UnitX * 0.05f;
+		private Vector2 platformVelocity = Vector2.right * 0.05f;
 
 		public override void Initialize()
 		{
@@ -123,12 +124,12 @@ namespace Humper.Sample.Basic
 
 		private void UpdatePlatform(Box platform, float delta)
 		{
-			if ((platform.Bounds.X < 50 && platformVelocity.X < 0) || (platform.Bounds.X > 300 && platformVelocity.X > 0))
+			if ((platform.Bounds.xMin < 50 && platformVelocity.X < 0) || (platform.Bounds.xMin > 300 && platformVelocity.X > 0))
 			{
 				platformVelocity.X *= -1;
 			}
 
-			platform.Move(new Vector2(platform.Bounds.X + platformVelocity.X * delta, platform.Bounds.Y), (collistion) => CollisionResponses.None);
+			platform.Move(new Vector2(platform.Bounds.xMin + platformVelocity.X * delta, platform.Bounds.Y), (collistion) => CollisionResponses.None);
 		}
 
 		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
@@ -151,7 +152,7 @@ namespace Humper.Sample.Basic
 				velocity.Y *= 0.75f;
 
 			// Moving player
-			var move = player.Move(player.Bounds.Location + delta * velocity, (collision) =>
+			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) =>
 			{
 				if (collision.Other.HasTag(Tags.Group3))
 				{

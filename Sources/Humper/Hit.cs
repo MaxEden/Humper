@@ -1,5 +1,6 @@
 ﻿using System;
 using Humper.Base;
+using Mandarin.Common.Misc;
 
 namespace Humper
 {
@@ -38,7 +39,7 @@ namespace Humper
             return thisDistance < otherDistance;
         }
 
-        private static Tuple<Vector2, Vector2> PushOutside(Vector2 origin, Rect other)
+        private static (Vector2 position, Vector2 normal) PushOutside(Vector2 origin, Rect other)
         {
             var position = origin;
             var normal = Vector2.Zero;
@@ -71,12 +72,12 @@ namespace Humper
                 position = new Vector2(other.Right, position.Y);
             }
 
-            return new Tuple<Vector2, Vector2>(position, normal);
+            return (position, normal);
         }
 
         private static (Vector2 position, Vector2 normal) PushOutside(Rect origin, Rect other)
         {
-            var position = origin.Location;
+            var position = origin.Position;
             var normal = Vector2.Zero;
 
             var top = origin.Center.Y - other.Top;
@@ -113,7 +114,7 @@ namespace Humper
         private static Hit ResolveNarrow(Rect origin, Rect destination, Rect other)
         {
             // if starts inside, push it outside at the neareast place
-            if(other.Contains(origin) || other.Intersects(origin))
+            if(other.Contains(origin) || other.Overlaps(origin))
             {
                 var outside = PushOutside(origin, other);
                 return new Hit
@@ -124,7 +125,7 @@ namespace Humper
                 };
             }
 
-            var velocity = destination.Location - origin.Location;
+            var velocity = destination.Position - origin.Position;
 
             Vector2 invEntry, invExit, entry, exit;
 
@@ -190,7 +191,7 @@ namespace Humper
             var result = new Hit
             {
                 Amount = entryTime,
-                Position = origin.Location + velocity * entryTime,
+                Position = origin.Position + velocity * entryTime,
                 Normal = GetNormal(invEntry, invExit, entry)
             };
 
@@ -207,8 +208,8 @@ namespace Humper
                 return new Hit
                 {
                     Amount = 0,
-                    Position = outside.Item1,
-                    Normal = outside.Item2
+                    Position = outside.position,
+                    Normal = outside.normal
                 };
             }
 
@@ -314,7 +315,7 @@ namespace Humper
         {
             var broadphaseArea = Rect.Union(origin, destination);
 
-            if(broadphaseArea.Intersects(other) || broadphaseArea.Contains(other))
+            if(broadphaseArea.Overlaps(other) || broadphaseArea.Contains(other))
             {
                 return ResolveNarrow(origin, destination, other);
             }
@@ -329,7 +330,7 @@ namespace Humper
 
             var broadphaseArea = new Rect(min, size);
 
-            if(broadphaseArea.Intersects(other) || broadphaseArea.Contains(other))
+            if(broadphaseArea.Overlaps(other) || broadphaseArea.Contains(other))
             {
                 return ResolveNarrow(origin, destination, other);
             }
@@ -346,8 +347,8 @@ namespace Humper
                 {
                     Amount = 0,
                     Box = other,
-                    Position = outside.Item1,
-                    Normal = outside.Item2
+                    Position = outside.position,
+                    Normal = outside.normal
                 };
             }
 

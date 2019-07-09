@@ -1,5 +1,6 @@
 ﻿using Humper.Base;
 using Humper.Responses;
+using Mandarin.Common.Misc;
 
 namespace Humper
 {
@@ -10,7 +11,7 @@ namespace Humper
             var velocity = collision.Goal.Center - collision.Origin.Center;
             var normal = collision.Hit.Normal;
             var dot = collision.Hit.Remaining * (velocity.X * normal.Y + velocity.Y * normal.X);
-            var slide = new Vector2(normal.Y, normal.X) * dot;
+            var slide = normal* dot;
 
             Destination = new Rect(collision.Hit.Position + slide, collision.Goal.Size);
         }

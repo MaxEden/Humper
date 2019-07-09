@@ -5,4 +5,7 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Mandarin\Mandarin.Common\Mandarin.Common.csproj" />
+  </ItemGroup>
 </Project>
