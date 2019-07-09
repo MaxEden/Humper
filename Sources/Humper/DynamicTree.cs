@@ -20,66 +20,33 @@
 * 3. This notice may not be removed or altered from any source distribution. 
 */
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Humper.Base;
 
 namespace Humper
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-
-
     /// <summary>
-    /// A dynamic tree arranges data in a binary tree to accelerate
-    /// queries such as volume queries and ray casts. Leafs are proxies
-    /// with an AABB. In the tree we expand the proxy AABB by Settings.b2_fatAABBFactor
-    /// so that the proxy AABB is bigger than the client object. This allows the client
-    /// object to move by small amounts without triggering a tree update.
-    /// Nodes are pooled and relocatable, so we use node indices rather than pointers.
+    ///     A dynamic tree arranges data in a binary tree to accelerate
+    ///     queries such as volume queries and ray casts. Leafs are proxies
+    ///     with an AABB. In the tree we expand the proxy AABB by Settings.b2_fatAABBFactor
+    ///     so that the proxy AABB is bigger than the client object. This allows the client
+    ///     object to move by small amounts without triggering a tree update.
+    ///     Nodes are pooled and relocatable, so we use node indices rather than pointers.
     /// </summary>
-    public class DynamicTree: IBroadPhase
+    public class DynamicTree : IBroadPhase
     {
-        public class Node
-        {
-            /// <summary>
-            /// Enlarged AABB
-            /// </summary>
-            internal Rect Rect;
-
-            internal Node Child_1;
-            internal Node Child_2;
-
-            internal int    Height;
-            internal Node   Parent;
-            internal object UserData;
-            internal int    Id;
-
-            internal bool IsLeaf()
-            {
-                return Child_1 == DynamicTree.NullNode;
-            }
-        }
-
         internal const   Node        NullNode = null;
         private readonly List<Node>  _nodes;
         private readonly Stack<Node> _queryStack   = new Stack<Node>();
         private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
-        private          Vector2     AABBExtension  = Vector2.Zero;
-        private          Vector2     AABBMultiplier = Vector2.One;
-        private Rect _bounds;
+        private readonly Vector2     AABBExtension  = Vector2.Zero;
+        private readonly Vector2     AABBMultiplier = Vector2.One;
 
         /// <summary>
-        /// Constructing the tree initializes the node pool.
-        /// </summary>
-        public DynamicTree()
-        {
-            _root = NullNode;
-            _nodes = new List<Node>();
-        }
-
-        /// <summary>
-        /// Compute the height of the binary tree in O(N) time. Should not be called often.
+        ///     Compute the height of the binary tree in O(N) time. Should not be called often.
         /// </summary>
         public int Height
         {
@@ -95,7 +62,7 @@ namespace Humper
         }
 
         /// <summary>
-        /// Get the ratio of the sum of the node areas to the root area.
+        ///     Get the ratio of the sum of the node areas to the root area.
         /// </summary>
         public float AreaRatio
         {
@@ -106,9 +73,9 @@ namespace Humper
                     return 0.0f;
                 }
 
-                float rootArea = _root.Rect.Perimeter;
+                var rootArea = _root.Rect.Perimeter;
 
-                float totalArea = 0.0f;
+                var totalArea = 0.0f;
                 foreach(var node in _nodes)
                 {
                     if(node.Height < 0)
@@ -124,14 +91,14 @@ namespace Humper
         }
 
         /// <summary>
-        /// Get the maximum balance of an node in the tree. The balance is the difference
-        /// in height of the two children of a node.
+        ///     Get the maximum balance of an node in the tree. The balance is the difference
+        ///     in height of the two children of a node.
         /// </summary>
         public int MaxBalance
         {
             get
             {
-                int maxBalance = 0;
+                var maxBalance = 0;
                 foreach(var node in _nodes)
                 {
                     if(node.Height <= 1)
@@ -143,7 +110,7 @@ namespace Humper
 
                     var child1 = node.Child_1;
                     var child2 = node.Child_2;
-                    int balance = Math.Abs(child2.Height - child1.Height);
+                    var balance = Math.Abs(child2.Height - child1.Height);
                     maxBalance = Math.Max(maxBalance, balance);
                 }
 
@@ -152,9 +119,51 @@ namespace Humper
         }
 
         /// <summary>
-        /// Create a proxy in the tree as a leaf node. We return the index
-        /// of the node instead of a pointer so that we can grow
-        /// the node pool.
+        ///     Constructing the tree initializes the node pool.
+        /// </summary>
+        public DynamicTree()
+        {
+            _root = NullNode;
+            _nodes = new List<Node>();
+        }
+        void IBroadPhase.Add(Box box)
+        {
+            var node = AddProxy(box.Bounds, box);
+            box.BroadPhaseData = node;
+        }
+        IEnumerable<Box> IBroadPhase.QueryBoxes(Rect area)
+        {
+            var result = new List<Box>();
+            Query(p =>
+            {
+                result.Add((Box)p.UserData);
+                return true;
+            }, area);
+
+            return result;
+        }
+        Rect IBroadPhase.Bounds => _root?.Rect ?? Rect.Empty;
+        bool IBroadPhase.Remove(Box box)
+        {
+            return RemoveProxy((Node)box.BroadPhaseData);
+        }
+        void IBroadPhase.Update(Box box, Rect from)
+        {
+            MoveProxy((Node)box.BroadPhaseData, from, box.Bounds.Location - from.Location);
+        }
+        void IBroadPhase.DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
+        {
+            Query(p =>
+            {
+                drawCell(p.Rect, 0.25f);
+                return true;
+            }, area);
+        }
+
+        /// <summary>
+        ///     Create a proxy in the tree as a leaf node. We return the index
+        ///     of the node instead of a pointer so that we can grow
+        ///     the node pool.
         /// </summary>
         /// <param name="rect">The AABB.</param>
         /// <param name="userData">The user data.</param>
@@ -174,7 +183,7 @@ namespace Humper
         }
 
         /// <summary>
-        /// Destroy a proxy. This asserts if the id is invalid.
+        ///     Destroy a proxy. This asserts if the id is invalid.
         /// </summary>
         public bool RemoveProxy(Node node)
         {
@@ -185,9 +194,9 @@ namespace Humper
         }
 
         /// <summary>
-        /// Move a proxy with a swepted AABB. If the proxy has moved outside of its fattened AABB,
-        /// then the proxy is removed from the tree and re-inserted. Otherwise
-        /// the function returns immediately.
+        ///     Move a proxy with a swepted AABB. If the proxy has moved outside of its fattened AABB,
+        ///     then the proxy is removed from the tree and re-inserted. Otherwise
+        ///     the function returns immediately.
         /// </summary>
         /// <param name="node">The proxy id.</param>
         /// <param name="rect">The AABB.</param>
@@ -205,7 +214,7 @@ namespace Humper
             RemoveLeaf(node);
 
             // Extend AABB.
-            Rect newRect = rect.Expand(AABBExtension);
+            var newRect = rect.Expand(AABBExtension);
             // Predict AABB displacement.
             newRect = newRect.Offset(AABBMultiplier * displacement);
             node.Rect = newRect;
@@ -215,8 +224,8 @@ namespace Humper
         }
 
         /// <summary>
-        /// Query an AABB for overlapping proxies. The callback class
-        /// is called for each proxy that overlaps the supplied AABB.
+        ///     Query an AABB for overlapping proxies. The callback class
+        ///     is called for each proxy that overlaps the supplied AABB.
         /// </summary>
         /// <param name="callback">The callback.</param>
         /// <param name="rect">The AABB.</param>
@@ -237,7 +246,7 @@ namespace Humper
                 {
                     if(node.IsLeaf())
                     {
-                        bool proceed = callback(node);
+                        var proceed = callback(node);
                         if(proceed == false)
                         {
                             return;
@@ -253,34 +262,34 @@ namespace Humper
         }
 
         /// <summary>
-        /// Ray-cast against the proxies in the tree. This relies on the callback
-        /// to perform a exact ray-cast in the case were the proxy contains a Shape.
-        /// The callback also performs the any collision filtering. This has performance
-        /// roughly equal to k * log(n), where k is the number of collisions and n is the
-        /// number of proxies in the tree.
+        ///     Ray-cast against the proxies in the tree. This relies on the callback
+        ///     to perform a exact ray-cast in the case were the proxy contains a Shape.
+        ///     The callback also performs the any collision filtering. This has performance
+        ///     roughly equal to k * log(n), where k is the number of collisions and n is the
+        ///     number of proxies in the tree.
         /// </summary>
         /// <param name="callback">A callback class that is called for each proxy that is hit by the ray.</param>
         /// <param name="input">The ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).</param>
         public void RayCast(Func<RayCastInput, Node, float> callback, RayCastInput input)
         {
-            Vector2 p1 = input.From;
-            Vector2 p2 = input.To;
-            Vector2 r = p2 - p1;
+            var p1 = input.From;
+            var p2 = input.To;
+            var r = p2 - p1;
             Debug.Assert(r.LengthSquared() > 0.0f);
             r.Normalize();
 
             // v is perpendicular to the segment.
-            Vector2 absV = Vector2.Abs(new Vector2(-r.Y, r.X)); //Velcro: Inlined the 'v' variable
+            var absV = Vector2.Abs(new Vector2(-r.Y, r.X)); //Velcro: Inlined the 'v' variable
 
             // Separating axis for segment (Gino, p80).
             // |dot(v, p1 - c)| > dot(|v|, h)
 
-            float maxFraction = input.MaxFraction;
+            var maxFraction = input.MaxFraction;
 
             // Build a bounding box for the segment.
-            Rect segmentRect = new Rect();
+            var segmentRect = new Rect();
             {
-                Vector2 t = p1 + maxFraction * (p2 - p1);
+                var t = p1 + maxFraction * (p2 - p1);
                 segmentRect.Min = Vector2.Min(p1, t);
                 segmentRect.Max = Vector2.Max(p1, t);
             }
@@ -303,9 +312,9 @@ namespace Humper
 
                 // Separating axis for segment (Gino, p80).
                 // |dot(v, p1 - c)| > dot(|v|, h)
-                Vector2 c = node.Rect.Center;
-                Vector2 h = node.Rect.Extents;
-                float separation = Math.Abs(Vector2.Dot(new Vector2(-r.Y, r.X), p1 - c)) - Vector2.Dot(absV, h);
+                var c = node.Rect.Center;
+                var h = node.Rect.Extents;
+                var separation = Math.Abs(Vector2.Dot(new Vector2(-r.Y, r.X), p1 - c)) - Vector2.Dot(absV, h);
                 if(separation > 0.0f)
                 {
                     continue;
@@ -318,7 +327,7 @@ namespace Humper
                     subInput.To = input.To;
                     subInput.MaxFraction = maxFraction;
 
-                    float value = callback(subInput, node);
+                    var value = callback(subInput, node);
 
                     if(value == 0.0f)
                     {
@@ -330,7 +339,7 @@ namespace Humper
                     {
                         // Update segment bounding box.
                         maxFraction = value;
-                        Vector2 t = p1 + maxFraction * (p2 - p1);
+                        var t = p1 + maxFraction * (p2 - p1);
                         segmentRect.Min = Vector2.Min(p1, t);
                         segmentRect.Max = Vector2.Max(p1, t);
                     }
@@ -366,51 +375,51 @@ namespace Humper
             }
 
             // Find the best sibling for this node
-            Rect leafRect = leaf.Rect;
+            var leafRect = leaf.Rect;
             var current = _root;
             while(current.IsLeaf() == false)
             {
                 var child1 = current.Child_1;
                 var child2 = current.Child_2;
 
-                float area = current.Rect.Perimeter;
+                var area = current.Rect.Perimeter;
 
-                Rect combinedRect = Rect.Union(current.Rect, leafRect);
-                float combinedArea = combinedRect.Perimeter;
+                var combinedRect = Rect.Union(current.Rect, leafRect);
+                var combinedArea = combinedRect.Perimeter;
 
                 // Cost of creating a new parent for this node and the new leaf
-                float cost = 2.0f * combinedArea;
+                var cost = 2.0f * combinedArea;
 
                 // Minimum cost of pushing the leaf further down the tree
-                float inheritanceCost = 2.0f * (combinedArea - area);
+                var inheritanceCost = 2.0f * (combinedArea - area);
 
                 // Cost of descending into child1
                 float cost1;
                 if(child1.IsLeaf())
                 {
-                    Rect rect = Rect.Union(leafRect, child1.Rect);
+                    var rect = Rect.Union(leafRect, child1.Rect);
                     cost1 = rect.Perimeter + inheritanceCost;
                 }
                 else
                 {
-                    Rect rect = Rect.Union(leafRect, child1.Rect);
-                    float oldArea = child1.Rect.Perimeter;
-                    float newArea = rect.Perimeter;
-                    cost1 = (newArea - oldArea) + inheritanceCost;
+                    var rect = Rect.Union(leafRect, child1.Rect);
+                    var oldArea = child1.Rect.Perimeter;
+                    var newArea = rect.Perimeter;
+                    cost1 = newArea - oldArea + inheritanceCost;
                 }
 
                 // Cost of descending into child2
                 float cost2;
                 if(child2.IsLeaf())
                 {
-                    Rect rect = Rect.Union(leafRect, child2.Rect);
+                    var rect = Rect.Union(leafRect, child2.Rect);
                     cost2 = rect.Perimeter + inheritanceCost;
                 }
                 else
                 {
-                    Rect rect = Rect.Union(leafRect, child2.Rect);
-                    float oldArea = child2.Rect.Perimeter;
-                    float newArea = rect.Perimeter;
+                    var rect = Rect.Union(leafRect, child2.Rect);
+                    var oldArea = child2.Rect.Perimeter;
+                    var newArea = rect.Perimeter;
                     cost2 = newArea - oldArea + inheritanceCost;
                 }
 
@@ -549,7 +558,7 @@ namespace Humper
         }
 
         /// <summary>
-        /// Perform a left or right rotation if node A is imbalanced.
+        ///     Perform a left or right rotation if node A is imbalanced.
         /// </summary>
         /// <param name="iA"></param>
         /// <returns>the new root index.</returns>
@@ -563,7 +572,7 @@ namespace Humper
             var B = A.Child_1;
             var C = A.Child_2;
 
-            int balance = C.Height - B.Height;
+            var balance = C.Height - B.Height;
 
             // Rotate C up
             if(balance > 1)
@@ -680,7 +689,7 @@ namespace Humper
         }
 
         /// <summary>
-        /// Compute the height of a sub-tree.
+        ///     Compute the height of a sub-tree.
         /// </summary>
         /// <param name="nodeId">The node id to use as parent.</param>
         /// <returns>The height of the tree.</returns>
@@ -691,18 +700,18 @@ namespace Humper
                 return 0;
             }
 
-            int height1 = ComputeHeight(node.Child_1);
-            int height2 = ComputeHeight(node.Child_2);
+            var height1 = ComputeHeight(node.Child_1);
+            var height2 = ComputeHeight(node.Child_2);
             return 1 + Math.Max(height1, height2);
         }
 
         /// <summary>
-        /// Compute the height of the entire tree.
+        ///     Compute the height of the entire tree.
         /// </summary>
         /// <returns>The height of the tree.</returns>
         public int ComputeHeight()
         {
-            int height = ComputeHeight(_root);
+            var height = ComputeHeight(_root);
             return height;
         }
 
@@ -754,12 +763,12 @@ namespace Humper
                 return;
             }
 
-            int height1 = child1.Height;
-            int height2 = child2.Height;
-            int height = 1 + Math.Max(height1, height2);
+            var height1 = child1.Height;
+            var height2 = child2.Height;
+            var height = 1 + Math.Max(height1, height2);
             Debug.Assert(node.Height == height);
 
-            Rect rect = Rect.Union(child1.Rect, child2.Rect);
+            var rect = Rect.Union(child1.Rect, child2.Rect);
 
             Debug.Assert(rect.Min == node.Rect.Min);
             Debug.Assert(rect.Max == node.Rect.Max);
@@ -769,7 +778,7 @@ namespace Humper
         }
 
         /// <summary>
-        /// Validate this tree. For testing.
+        ///     Validate this tree. For testing.
         /// </summary>
         public void Validate()
         {
@@ -779,15 +788,15 @@ namespace Humper
         }
 
         /// <summary>
-        /// Build an optimal tree. Very expensive. For testing.
+        ///     Build an optimal tree. Very expensive. For testing.
         /// </summary>
         public void RebuildBottomUp()
         {
             var nodes = new List<Node>(_nodes.Count);
-            int count = 0;
+            var count = 0;
 
             // Build array of leaves. Free the rest.
-            for(int i = 0; i < nodes.Count; ++i)
+            for(var i = 0; i < nodes.Count; ++i)
             {
                 var node = _nodes[i];
                 if(node.Height < 0)
@@ -810,17 +819,17 @@ namespace Humper
 
             while(count > 1)
             {
-                float minCost = float.MaxValue;
+                var minCost = float.MaxValue;
                 int iMin = -1, jMin = -1;
-                for(int i = 0; i < count; ++i)
+                for(var i = 0; i < count; ++i)
                 {
-                    Rect i_rect = nodes[i].Rect;
+                    var i_rect = nodes[i].Rect;
 
-                    for(int j = i + 1; j < count; ++j)
+                    for(var j = i + 1; j < count; ++j)
                     {
-                        Rect j_rect = nodes[j].Rect;
-                        Rect b = Rect.Union(i_rect, j_rect);
-                        float cost = b.Perimeter;
+                        var j_rect = nodes[j].Rect;
+                        var b = Rect.Union(i_rect, j_rect);
+                        var cost = b.Perimeter;
                         if(cost < minCost)
                         {
                             iMin = i;
@@ -856,13 +865,13 @@ namespace Humper
         }
 
         /// <summary>
-        /// Shift the origin of the nodes
+        ///     Shift the origin of the nodes
         /// </summary>
         /// <param name="newOrigin">The displacement to use.</param>
         public void ShiftOrigin(Vector2 newOrigin)
         {
             // Build array of leaves. Free the rest.
-            foreach(Node node in _nodes)
+            foreach(var node in _nodes)
             {
                 node.Rect.Min -= newOrigin;
                 node.Rect.Max -= newOrigin;
@@ -877,38 +886,24 @@ namespace Humper
         {
             return _nodes[id - 1];
         }
-        void IBroadPhase.Add(Box box)
+        public class Node
         {
-            var node = AddProxy(box.Bounds, box);
-            box.BroadPhaseData = node;
-        }
-        IEnumerable<Box> IBroadPhase.QueryBoxes(Rect area)
-        {
-            List<Box> result = new List<Box>();
-            Query(p =>
-            {
-                result.Add((Box)p.UserData);
-                return true;
-            }, area);
+            internal Node Child_1;
+            internal Node Child_2;
 
-            return result;
-        }
-        Rect IBroadPhase.Bounds => _bounds;
-        bool IBroadPhase.Remove(Box box)
-        {
-            return RemoveProxy((Node)box.BroadPhaseData);
-        }
-        void IBroadPhase.Update(Box box, Rect @from)
-        {
-            MoveProxy((Node)box.BroadPhaseData, @from, box.Bounds.Location - from.Location);
-        }
-        void IBroadPhase.DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
-        {
-            Query(p =>
+            internal int  Height;
+            internal int  Id;
+            internal Node Parent;
+            /// <summary>
+            ///     Enlarged AABB
+            /// </summary>
+            internal Rect Rect;
+            internal object UserData;
+
+            internal bool IsLeaf()
             {
-                drawCell(p.Rect, 0.25f);
-                return true;
-            }, area);
+                return Child_1 == NullNode;
+            }
         }
     }
 }

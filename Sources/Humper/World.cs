@@ -1,190 +1,190 @@
-﻿namespace Humper
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Humper.Base;
+using Humper.Responses;
+
+namespace Humper
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using Base;
-	using Responses;
+    public class World
+    {
+        public Rect Bounds => _broadPhase.Bounds;
+        public World(IBroadPhase broadPhase)
+        {
+            _broadPhase = broadPhase;
+        }
 
-	public class World 
-	{
-		public World(IBroadPhase broadPhase)
-		{
-			this._broadPhase = broadPhase;
-		}
+        #region Diagnostics
 
-		public Rect Bounds => _broadPhase.Bounds;
+        public void DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
+        {
+            // Drawing boxes
+            var boxes = _broadPhase.QueryBoxes(area);
+            foreach(var box in boxes)
+            {
+                drawBox(box);
+            }
 
-		#region Boxes
+            _broadPhase.DrawDebug(area, drawCell, drawBox, drawString);
+        }
 
-		private IBroadPhase _broadPhase;
+        #endregion
 
-		public int Boxes {get;private set;}
+        #region Boxes
 
-		public Box Create(Rect area)
-		{
-			var box = new Box(this, area);
-			this._broadPhase.Add(box);
-			Boxes++;
-			return box;
-		}
+        private readonly IBroadPhase _broadPhase;
 
-		public IEnumerable<Box> Find(Rect area)
-		{
-			return this._broadPhase.QueryBoxes(area);
-		}
+        public int Boxes { get; private set; }
 
-		public bool Remove(Box box)
-		{
-			Boxes--;
-			return this._broadPhase.Remove(box);
-		}
+        public Box Create(Rect area)
+        {
+            var box = new Box(this, area);
+            _broadPhase.Add(box);
+            Boxes++;
+            return box;
+        }
 
-		public void Update(Box box, Rect from)
-		{
-			this._broadPhase.Update(box, from);
-		}
+        public IEnumerable<Box> Find(Rect area)
+        {
+            return _broadPhase.QueryBoxes(area);
+        }
 
-		#endregion
+        public bool Remove(Box box)
+        {
+            Boxes--;
+            return _broadPhase.Remove(box);
+        }
 
-		#region Hits
+        public void Update(Box box, Rect from)
+        {
+            _broadPhase.Update(box, from);
+        }
 
-		public IHit Hit(Vector2 point, IEnumerable<Box> ignoring = null)
-		{
-			var boxes = this._broadPhase.QueryBoxes(new Rect(point,Vector2.Zero));
+        #endregion
 
-			if (ignoring != null)
-			{
-				boxes = boxes.Except(ignoring);
-			}
+        #region Hits
 
-			foreach (var other in boxes)
-			{
-				var hit = Humper.Hit.Resolve(point, other);
+        public IHit Hit(Vector2 point, IEnumerable<Box> ignoring = null)
+        {
+            var boxes = _broadPhase.QueryBoxes(new Rect(point, Vector2.Zero));
 
-				if (hit != null)
-				{
-					return hit;
-				}
-			}
+            if(ignoring != null)
+            {
+                boxes = boxes.Except(ignoring);
+            }
 
-			return null;
-		}
+            foreach(var other in boxes)
+            {
+                var hit = Humper.Hit.Resolve(point, other);
 
-		public IHit Hit(Vector2 origin, Vector2 destination, IEnumerable<Box> ignoring = null)
-		{
-			var min = Vector2.Min(origin, destination);
-			var max = Vector2.Max(origin, destination);
+                if(hit != null)
+                {
+                    return hit;
+                }
+            }
 
-			var wrap = Rect.FromPoints(min, max);
-			var boxes = this.Find(wrap);
+            return null;
+        }
 
-			if (ignoring != null)
-			{
-				boxes = boxes.Except(ignoring);
-			}
+        public IHit Hit(Vector2 origin, Vector2 destination, IEnumerable<Box> ignoring = null)
+        {
+            var min = Vector2.Min(origin, destination);
+            var max = Vector2.Max(origin, destination);
 
-			IHit nearest = null;
+            var wrap = Rect.FromPoints(min, max);
+            var boxes = Find(wrap);
 
-			foreach (var other in boxes)
-			{
-				var hit = Humper.Hit.Resolve(origin, destination, other);
+            if(ignoring != null)
+            {
+                boxes = boxes.Except(ignoring);
+            }
 
-				if (hit != null && (nearest == null || hit.IsNearest(nearest,origin)))
-				{
-					nearest = hit;
-				}
-			}
+            IHit nearest = null;
 
-			return nearest;
-		}
+            foreach(var other in boxes)
+            {
+                var hit = Humper.Hit.Resolve(origin, destination, other);
 
-		public IHit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
-		{
-			var wrap = new Rect(origin, destination);
-			var boxes = this.Find(wrap);
+                if(hit != null && (nearest == null || hit.IsNearest(nearest, origin)))
+                {
+                    nearest = hit;
+                }
+            }
 
-			if (ignoring != null)
-			{
-				boxes = boxes.Except(ignoring);
-			}
+            return nearest;
+        }
 
-			IHit nearest = null;
+        public IHit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
+        {
+            var wrap = new Rect(origin, destination);
+            var boxes = Find(wrap);
 
-			foreach (var other in boxes)
-			{
-				var hit = Humper.Hit.Resolve(origin, destination, other);
+            if(ignoring != null)
+            {
+                boxes = boxes.Except(ignoring);
+            }
 
-				if (hit != null && (nearest == null || hit.IsNearest(nearest, origin.Location)))
-				{
-					nearest = hit;
-				}
-			}
+            IHit nearest = null;
 
-			return nearest;
-		}
+            foreach(var other in boxes)
+            {
+                var hit = Humper.Hit.Resolve(origin, destination, other);
 
-		#endregion
+                if(hit != null && (nearest == null || hit.IsNearest(nearest, origin.Location)))
+                {
+                    nearest = hit;
+                }
+            }
 
-		#region Movements
+            return nearest;
+        }
 
-		public IMovement Simulate(Box box, Vector2 destination, Func<ICollision, ICollisionResponse> filter)
-		{
-			var origin = box.Bounds;
-			var goal = new Rect(destination, box.Bounds.Size);
+        #endregion
 
-			var hits = new List<IHit>();
+        #region Movements
 
-			var result = new Movement()
-			{
-				Origin = origin,
-				Goal = goal,
-				Destination = this.Simulate(hits, new List<Box>() { box }, box, origin, goal, filter),
-				Hits = hits,
-			};
+        public IMovement Simulate(Box box, Vector2 destination, Func<ICollision, ICollisionResponse> filter)
+        {
+            var origin = box.Bounds;
+            var goal = new Rect(destination, box.Bounds.Size);
 
-			return result;
-		}
+            var hits = new List<IHit>();
 
-		private Rect Simulate(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, Func<ICollision, ICollisionResponse> filter)
-		{
-			var nearest = this.Hit(origin, destination, ignoring);
-				
-			if (nearest != null)
-			{
-				hits.Add(nearest);
+            var result = new Movement
+            {
+                Origin = origin,
+                Goal = goal,
+                Destination = Simulate(hits, new List<Box>
+                                           {box}, box, origin, goal, filter),
+                Hits = hits
+            };
 
-				var impact = new Rect(nearest.Position, origin.Size);
-				var collision = new Collision() { Box = box, Hit = nearest, Goal = destination, Origin = origin };
-				var response = filter(collision);
+            return result;
+        }
 
-				if (response != null && destination != response.Destination)
-				{
-					ignoring.Add(nearest.Box);
-					return this.Simulate(hits, ignoring, box, impact, response.Destination, filter);
-				}
-			}
+        private Rect Simulate(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, Func<ICollision, ICollisionResponse> filter)
+        {
+            var nearest = Hit(origin, destination, ignoring);
 
-			return destination;
-		}
+            if(nearest != null)
+            {
+                hits.Add(nearest);
 
-		#endregion
+                var impact = new Rect(nearest.Position, origin.Size);
+                var collision = new Collision
+                    {Box = box, Hit = nearest, Goal = destination, Origin = origin};
+                var response = filter(collision);
 
-		#region Diagnostics
+                if(response != null && destination != response.Destination)
+                {
+                    ignoring.Add(nearest.Box);
+                    return Simulate(hits, ignoring, box, impact, response.Destination, filter);
+                }
+            }
 
-		public void DrawDebug(Rect area, Action<Rect,float> drawCell, Action<Box> drawBox, Action<string,int,int, float> drawString)
-		{
-			// Drawing boxes
-			var boxes = _broadPhase.QueryBoxes(area);
-			foreach (var box in boxes)
-			{
-				drawBox(box);
-			}
+            return destination;
+        }
 
-			_broadPhase.DrawDebug(area, drawCell, drawBox, drawString);
-		}
-
-		#endregion
-	}
+        #endregion
+    }
 }
-

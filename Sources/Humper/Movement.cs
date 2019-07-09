@@ -1,25 +1,24 @@
-﻿namespace Humper
+﻿using System.Collections.Generic;
+using System.Linq;
+using Humper.Base;
+
+namespace Humper
 {
-	using Base;
-	using System.Collections.Generic;
-	using System.Linq;
+    public class Movement : IMovement
+    {
+        public Movement()
+        {
+            Hits = new IHit[0];
+        }
 
-	public class Movement : IMovement
-	{
-		public Movement()
-		{
-			this.Hits = new IHit[0];
-		}
+        public IEnumerable<IHit> Hits { get; set; }
 
-		public IEnumerable<IHit> Hits { get; set; }
+        public bool HasCollided => Hits.Any();
 
-		public bool HasCollided { get { return this.Hits.Any(); } }
+        public Rect Origin { get; set; }
 
-		public Rect Origin { get; set; }
+        public Rect Destination { get; set; }
 
-		public Rect Destination { get; set; }
-
-		public Rect Goal { get; set; }
-	}
+        public Rect Goal { get; set; }
+    }
 }
-

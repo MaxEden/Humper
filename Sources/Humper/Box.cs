@@ -1,10 +1,10 @@
-﻿namespace Humper
-{
-    using System;
-    using System.Linq;
-    using Base;
-    using Responses;
+﻿using System;
+using System.Linq;
+using Humper.Base;
+using Humper.Responses;
 
+namespace Humper
+{
     public class Box
     {
         #region Constructors 
@@ -12,14 +12,14 @@
         public Box(World world, Rect area)
         {
             this.world = world;
-            this.bounds = area;
+            bounds = area;
         }
 
         #endregion
 
         #region Fields
 
-        private World world;
+        private readonly World world;
 
         private Rect bounds;
 
@@ -27,14 +27,11 @@
 
         #region Properties
 
-        public Rect Bounds
-        {
-            get { return bounds; }
-        }
+        public Rect Bounds => bounds;
 
-        public object Data;
+        public   object Data;
         internal object BroadPhaseData;
-        
+
         #endregion
 
         #region Movements
@@ -46,10 +43,12 @@
 
         public IMovement Simulate(Vector2 destination, Func<ICollision, CollisionResponses> filter)
         {
-            return Simulate(destination, (col) =>
+            return Simulate(destination, col =>
             {
                 if(col.Hit == null)
+                {
                     return null;
+                }
 
                 return CollisionResponse.Create(col, filter(col));
             });
@@ -57,19 +56,19 @@
 
         public IMovement Move(Vector2 destination, Func<ICollision, ICollisionResponse> filter)
         {
-            var movement = this.Simulate(destination, filter);
-            this.bounds.X = movement.Destination.X;
-            this.bounds.Y = movement.Destination.Y;
-            this.world.Update(this, movement.Origin);
+            var movement = Simulate(destination, filter);
+            bounds.X = movement.Destination.X;
+            bounds.Y = movement.Destination.Y;
+            world.Update(this, movement.Origin);
             return movement;
         }
 
         public IMovement Move(Vector2 destination, Func<ICollision, CollisionResponses> filter)
         {
-            var movement = this.Simulate(destination, filter);
-            this.bounds.X = movement.Destination.X;
-            this.bounds.Y = movement.Destination.Y;
-            this.world.Update(this, movement.Origin);
+            var movement = Simulate(destination, filter);
+            bounds.X = movement.Destination.X;
+            bounds.Y = movement.Destination.Y;
+            world.Update(this, movement.Origin);
             return movement;
         }
 
@@ -83,7 +82,7 @@
         {
             foreach(var tag in newTags)
             {
-                this.AddTag(tag);
+                AddTag(tag);
             }
 
             return this;
@@ -93,7 +92,7 @@
         {
             foreach(var tag in newTags)
             {
-                this.RemoveTag(tag);
+                RemoveTag(tag);
             }
 
             return this;
@@ -107,13 +106,17 @@
             }
             else
             {
-                var t = this.tags.GetType();
+                var t = tags.GetType();
                 var ut = Enum.GetUnderlyingType(t);
 
                 if(ut != typeof(ulong))
-                    this.tags = (Enum)Enum.ToObject(t, Convert.ToInt64(this.tags) | Convert.ToInt64(tag));
+                {
+                    tags = (Enum)Enum.ToObject(t, Convert.ToInt64(tags) | Convert.ToInt64(tag));
+                }
                 else
-                    this.tags = (Enum)Enum.ToObject(t, Convert.ToUInt64(this.tags) | Convert.ToUInt64(tag));
+                {
+                    tags = (Enum)Enum.ToObject(t, Convert.ToUInt64(tags) | Convert.ToUInt64(tag));
+                }
             }
         }
 
@@ -121,24 +124,28 @@
         {
             if(tags != null)
             {
-                var t = this.tags.GetType();
+                var t = tags.GetType();
                 var ut = Enum.GetUnderlyingType(t);
 
                 if(ut != typeof(ulong))
-                    this.tags = (Enum)Enum.ToObject(t, Convert.ToInt64(this.tags) & ~Convert.ToInt64(tag));
+                {
+                    tags = (Enum)Enum.ToObject(t, Convert.ToInt64(tags) & ~Convert.ToInt64(tag));
+                }
                 else
-                    this.tags = (Enum)Enum.ToObject(t, Convert.ToUInt64(this.tags) & ~Convert.ToUInt64(tag));
+                {
+                    tags = (Enum)Enum.ToObject(t, Convert.ToUInt64(tags) & ~Convert.ToUInt64(tag));
+                }
             }
         }
 
         public bool HasTag(params Enum[] values)
         {
-            return (tags != null) && values.Any((value) => this.tags.HasFlag(value));
+            return tags != null && values.Any(value => tags.HasFlag(value));
         }
 
         public bool HasTags(params Enum[] values)
         {
-            return (tags != null) && values.All((value) => this.tags.HasFlag(value));
+            return tags != null && values.All(value => tags.HasFlag(value));
         }
 
         #endregion

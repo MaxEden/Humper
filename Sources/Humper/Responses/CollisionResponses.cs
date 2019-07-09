@@ -1,12 +1,11 @@
 ﻿namespace Humper.Responses
 {
-	public enum CollisionResponses
-	{
-		None,
-		Touch,
-		Cross,
-		Slide,
-		Bounce,
-	}
+    public enum CollisionResponses
+    {
+        None,
+        Touch,
+        Cross,
+        Slide,
+        Bounce
+    }
 }
-

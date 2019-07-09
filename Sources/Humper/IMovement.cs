@@ -1,19 +1,18 @@
-﻿namespace Humper
+﻿using System.Collections.Generic;
+using Humper.Base;
+
+namespace Humper
 {
-	using System.Collections.Generic;
-	using Base;
+    public interface IMovement
+    {
+        IEnumerable<IHit> Hits { get; }
 
-	public interface IMovement
-	{
-		IEnumerable<IHit> Hits { get; }
+        bool HasCollided { get; }
 
-		bool HasCollided { get; }
+        Rect Origin { get; }
 
-		Rect Origin { get; }
+        Rect Goal { get; }
 
-		Rect Goal { get; }
-
-		Rect Destination { get; }
-	}
+        Rect Destination { get; }
+    }
 }
-

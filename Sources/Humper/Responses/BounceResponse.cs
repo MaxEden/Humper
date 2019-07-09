@@ -1,29 +1,28 @@
-﻿namespace Humper.Responses
+﻿using System;
+using Humper.Base;
+
+namespace Humper.Responses
 {
-	using Base;
-	using System;
+    public class BounceResponse : ICollisionResponse
+    {
+        public BounceResponse(ICollision collision)
+        {
+            var velocity = collision.Goal.Center - collision.Origin.Center;
+            var deflected = velocity * collision.Hit.Amount;
 
-	public class BounceResponse : ICollisionResponse
-	{
-		public BounceResponse(ICollision collision)
-		{
-			var velocity = (collision.Goal.Center - collision.Origin.Center);
-			var deflected = velocity * collision.Hit.Amount;
+            if(Math.Abs(collision.Hit.Normal.X) > 0.00001f)
+            {
+                deflected.X *= -1;
+            }
 
-			if (Math.Abs(collision.Hit.Normal.X) > 0.00001f)
-			{
-				deflected.X *= -1;
-			}
+            if(Math.Abs(collision.Hit.Normal.Y) > 0.00001f)
+            {
+                deflected.Y *= -1;
+            }
 
-			if (Math.Abs(collision.Hit.Normal.Y) > 0.00001f)
-			{
-				deflected.Y *= -1;
-			}
+            Destination = new Rect(collision.Hit.Position + deflected, collision.Goal.Size);
+        }
 
-			this.Destination = new Rect(collision.Hit.Position + deflected, collision.Goal.Size);
-		}
-
-		public Rect Destination { get; private set; }
-	}
+        public Rect Destination { get; }
+    }
 }
-

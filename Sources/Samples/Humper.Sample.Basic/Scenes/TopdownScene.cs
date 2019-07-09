@@ -18,7 +18,7 @@ namespace Humper.Sample.Basic
 
 		public override void Initialize()
 		{
-			World = new World(new Grid(1024, 700));
+			World = new World(new DynamicTree());
 
 			player1 = World.Create(new Rect(50, 50, 24, 24)).AddTags(Tags.Group1);
 			player2 = World.Create(new Rect(100, 50, 24, 24)).AddTags(Tags.Group1);
