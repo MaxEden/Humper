@@ -9,7 +9,7 @@ namespace Humper
     {
         Rect Bounds { get; }
         void Add(Box box);
-        IEnumerable<Box> QueryBoxes(Rect area);
+        IList<Box> QueryBoxes(Rect area);
         bool Remove(Box box);
         void Update(Box box, Rect from);
         void DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString);

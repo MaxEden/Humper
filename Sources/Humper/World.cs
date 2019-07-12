@@ -45,7 +45,7 @@ namespace Humper
             return box;
         }
 
-        public IEnumerable<Box> Find(Rect area)
+        public IList<Box> Find(Rect area)
         {
             return _broadPhase.QueryBoxes(area);
         }
@@ -72,7 +72,7 @@ namespace Humper
 
             if(ignoring != null)
             {
-                boxes = boxes.Except(ignoring);
+                boxes = boxes.Except(ignoring).ToList();
             }
 
             IHit nearest = null;
@@ -94,7 +94,7 @@ namespace Humper
 
         #region Movements
 
-        public IMovement Simulate(Box box, Vector2 destination, Func<ICollision, ICollisionResponse> filter)
+        public IMovement Simulate(Box box, Vector2 destination,  CollisionResponse response)
         {
             var origin = box.Bounds;
             var goal = new Rect(destination, box.Bounds.Size);
@@ -106,14 +106,14 @@ namespace Humper
                 Origin = origin,
                 Goal = goal,
                 Destination = Simulate(hits, new List<Box>
-                                           {box}, box, origin, goal, filter),
+                                           {box}, box, origin, goal, response),
                 Hits = hits
             };
 
             return result;
         }
 
-        private Rect Simulate(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, Func<ICollision, ICollisionResponse> filter)
+        private Rect Simulate(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, CollisionResponse response)
         {
             var nearest = Hit(origin, destination, ignoring);
 
@@ -124,12 +124,19 @@ namespace Humper
                 var impact = new Rect(nearest.Position, origin.Size);
                 var collision = new Collision
                     {Box = box, Hit = nearest, Goal = destination, Origin = origin};
-                var response = filter(collision);
+                var dest = response(collision);
 
-                if(response != null && destination != response.Destination)
+                if(response != null && destination != dest)
                 {
                     ignoring.Add(nearest.Box);
-                    return Simulate(hits, ignoring, box, impact, response.Destination, filter);
+                    if(ignoring.Count > 20)
+                    {
+                        return dest;
+                    }
+                    else
+                    {
+                        return Simulate(hits, ignoring, box, impact, dest, response);
+                    }
                 }
             }
 

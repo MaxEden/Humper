@@ -32,11 +32,7 @@ namespace Humper.Sample.Basic
 			{
 				Velocity = Velocity + Vector2.down * delta * 0.001f;
 
-				var move = Box.Move(
-					delta*Velocity + Box.Bounds.Position, (collision) =>
-				{
-					return CollisionResponses.Bounce;
-				});
+				var move = Box.Move(delta*Velocity + Box.Bounds.Position, Response.Bounce);
 
 				// Testing if on ground
 				if (move.Hits.Any((c) => (c.Normal.Y < 0)))
@@ -62,8 +58,8 @@ namespace Humper.Sample.Basic
 
 		public override void Initialize()
 		{
-			//World = new World(new Grid(1024, 700));
-			World = new World(new DynamicTree());
+			World = new World(new Grid(1024, 700, 10));
+			//World = new World(new DynamicTree());
 
 			SpawnPlayer();
 
@@ -73,7 +69,7 @@ namespace Humper.Sample.Basic
 			World.Create(new Rect(1004, 20, 20, 660)).AddTags(Tags.Group2);
 			World.Create(new Rect(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
-			int maxBoxes = 300;
+			int maxBoxes = 200;
 			int width = 5;
 			for (int x = 24; x < 1000; x+=width*2)
 			{
@@ -111,7 +107,7 @@ namespace Humper.Sample.Basic
 				p.Update(delta);
 			}
 
-			return;
+			//return;
 			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
 		}
 
@@ -134,10 +130,7 @@ namespace Humper.Sample.Basic
 				velocity.Y += 0.5f;
 
 			// Moving player
-			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) =>
-			{
-				return CollisionResponses.Slide;
-			});
+			var move = player.Move(player.Bounds.Position + delta * velocity, Response.Slide);
 
 			// Testing if on ground
 			if (move.Hits.Any((c) => c.Box.HasTag(Tags.Group2, Tags.Group3) && (c.Normal.Y < 0)))

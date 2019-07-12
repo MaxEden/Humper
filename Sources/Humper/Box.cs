@@ -7,66 +7,32 @@ namespace Humper
 {
     public class Box
     {
-        #region Constructors 
-
-        public Box(World world, Rect area)
-        {
-            this.world = world;
-            bounds = area;
-        }
-
-        #endregion
-
-        #region Fields
-
-        private readonly World world;
-
-        private Rect bounds;
-
-        #endregion
-
-        #region Properties
-
-        public Rect Bounds => bounds;
-
+        private readonly World _world;
+        private          Rect  _bounds;
+        public           bool  IsActive;
+        
+        public Rect Bounds => _bounds;
         public   object Data;
         internal object BroadPhaseData;
 
-        #endregion
+        public Box(World world, Rect area)
+        {
+            this._world = world;
+            _bounds = area;
+        }
 
         #region Movements
 
-        public IMovement Simulate(Vector2 destination, Func<ICollision, ICollisionResponse> filter)
+        public IMovement Simulate(Vector2 destination, CollisionResponse filter)
         {
-            return world.Simulate(this, destination, filter);
+            return _world.Simulate(this, destination, filter);
         }
-
-        public IMovement Simulate(Vector2 destination, Func<ICollision, CollisionResponses> filter)
+        public IMovement Move(Vector2 destination, CollisionResponse filter)
         {
-            return Simulate(destination, col =>
-            {
-                if(col.Hit == null)
-                {
-                    return null;
-                }
-
-                return CollisionResponse.Create(col, filter(col));
-            });
-        }
-
-        public IMovement Move(Vector2 destination, Func<ICollision, ICollisionResponse> filter)
-        {
+            IsActive = true;
             var movement = Simulate(destination, filter);
-            bounds = movement.Destination;
-            world.Update(this, movement.Origin);
-            return movement;
-        }
-
-        public IMovement Move(Vector2 destination, Func<ICollision, CollisionResponses> filter)
-        {
-            var movement = Simulate(destination, filter);
-            bounds = movement.Destination;
-            world.Update(this, movement.Origin);
+            _bounds = movement.Destination;
+            _world.Update(this, movement.Origin);
             return movement;
         }
 

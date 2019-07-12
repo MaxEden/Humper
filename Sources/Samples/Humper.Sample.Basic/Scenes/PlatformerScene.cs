@@ -38,10 +38,10 @@ namespace Humper.Sample.Basic
 				{
 					if (collision.Other.HasTag(Tags.Group3))
 					{
-						return CollisionResponses.Cross;
+						return Response.Cross(collision);
 					}
 
-					return CollisionResponses.Slide;
+					return Response.Slide(collision);
 				});
 
 				inWater = (move.Hits.Any((c) => c.Box.HasTag(Tags.Group3)));
@@ -83,7 +83,7 @@ namespace Humper.Sample.Basic
 				new Crate(World.Create(new Rect(150, 220, 40, 40))),
 				new Crate(World.Create(new Rect(210, 220, 40, 40))),
 			};
-
+			
 			// Map
 			World.Create(new Rect(0, 300, 400, 20)).AddTags(Tags.Group2);
 			World.Create(new Rect(380, 320, 20, 80)).AddTags(Tags.Group2);
@@ -130,7 +130,7 @@ namespace Humper.Sample.Basic
 				platformVelocity.X *= -1;
 			}
 
-			platform.Move(new Vector2(platform.Bounds.xMin + platformVelocity.X * delta, platform.Bounds.Y), (collistion) => CollisionResponses.None);
+			platform.Move(new Vector2(platform.Bounds.xMin + platformVelocity.X * delta, platform.Bounds.Y), Response.Cross);
 		}
 
 		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
@@ -157,10 +157,10 @@ namespace Humper.Sample.Basic
 			{
 				if (collision.Other.HasTag(Tags.Group3))
 				{
-					return CollisionResponses.Cross;
+					return Response.Cross(collision);
 				}
 
-				return CollisionResponses.Slide;
+				return Response.Slide(collision);
 			});
 
 			// Testing if on moving platform

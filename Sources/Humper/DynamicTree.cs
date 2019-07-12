@@ -38,13 +38,14 @@ namespace Humper
     /// </summary>
     public class DynamicTree : IBroadPhase
     {
+        public Vector2 RectExtension                    = Vector2.One * 2;
+        public Vector2 DisplacementPredictionMultiplier = Vector2.One * 5;
+
         internal const   Node        NullNode = null;
         private readonly List<Node>  _nodes;
         private readonly Stack<Node> _queryStack   = new Stack<Node>();
         private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
-        private readonly Vector2     AABBExtension  = Vector2.Zero;
-        private readonly Vector2     AABBMultiplier = Vector2.One;
 
         /// <summary>
         ///     Compute the height of the binary tree in O(N) time. Should not be called often.
@@ -107,7 +108,7 @@ namespace Humper
                         continue;
                     }
 
-                    Debug.Assert(node.IsLeaf() == false);
+                    Debug.Assert(node.IsLeaf == false);
 
                     var child1 = node.Child_1;
                     var child2 = node.Child_2;
@@ -129,15 +130,22 @@ namespace Humper
         }
         void IBroadPhase.Add(Box box)
         {
-            var node = AddProxy(box.Bounds, box);
+            var node = AllocateNode();
+
+            node.Box = box;
+
+            node.Rect = box.IsActive ? box.Bounds.Expand(RectExtension) : box.Bounds;
+            node.Height = 0;
+
+            InsertLeaf(node);
             box.BroadPhaseData = node;
         }
-        IEnumerable<Box> IBroadPhase.QueryBoxes(Rect area)
+        IList<Box> IBroadPhase.QueryBoxes(Rect area)
         {
             var result = new List<Box>();
             Query(p =>
             {
-                result.Add((Box)p.UserData);
+                result.Add(p.Box);
                 return true;
             }, area);
 
@@ -162,33 +170,11 @@ namespace Humper
         }
 
         /// <summary>
-        ///     Create a proxy in the tree as a leaf node. We return the index
-        ///     of the node instead of a pointer so that we can grow
-        ///     the node pool.
-        /// </summary>
-        /// <param name="rect">The AABB.</param>
-        /// <param name="userData">The user data.</param>
-        /// <returns>Index of the created proxy</returns>
-        public Node AddProxy(Rect rect, object userData)
-        {
-            var node = AllocateNode();
-
-            // Fatten the AABB.
-            node.Rect = rect.Expand(AABBExtension);
-            node.UserData = userData;
-            node.Height = 0;
-
-            InsertLeaf(node);
-
-            return node;
-        }
-
-        /// <summary>
         ///     Destroy a proxy. This asserts if the id is invalid.
         /// </summary>
         public bool RemoveProxy(Node node)
         {
-            Debug.Assert(node.IsLeaf());
+            Debug.Assert(node.IsLeaf);
 
             RemoveLeaf(node);
             return FreeNode(node);
@@ -205,7 +191,7 @@ namespace Humper
         /// <returns>true if the proxy was re-inserted.</returns>
         public bool MoveProxy(Node node, Rect rect, Vector2 displacement)
         {
-            Debug.Assert(node.IsLeaf());
+            Debug.Assert(node.IsLeaf);
 
             if(node.Rect.Contains(rect))
             {
@@ -214,10 +200,18 @@ namespace Humper
 
             RemoveLeaf(node);
 
-            // Extend AABB.
-            var newRect = rect.Expand(AABBExtension);
-            // Predict AABB displacement.
-            newRect = newRect.Offset(AABBMultiplier * displacement);
+            
+            var newRect = rect;
+
+            if(node.Box.IsActive)
+            {
+                newRect = newRect
+                    .Offset(DisplacementPredictionMultiplier * displacement)
+                    .Expand(RectExtension);
+
+                newRect = Rect.Union(rect,newRect);
+            }
+
             node.Rect = newRect;
 
             InsertLeaf(node);
@@ -245,7 +239,7 @@ namespace Humper
 
                 if(node.Rect.Overlaps(rect))
                 {
-                    if(node.IsLeaf())
+                    if(node.IsLeaf)
                     {
                         var proceed = callback(node);
                         if(proceed == false)
@@ -270,10 +264,10 @@ namespace Humper
         }
         private void QueryNodes(Node node, Rect rect, IList<Node> nodes)
         {
-           if(node == NullNode) return;
-           nodes.Add(node);
-           QueryNodes(node.Child_1, rect, nodes);
-           QueryNodes(node.Child_2, rect, nodes);
+            if(node == NullNode) return;
+            nodes.Add(node);
+            QueryNodes(node.Child_1, rect, nodes);
+            QueryNodes(node.Child_2, rect, nodes);
         }
 
         /// <summary>
@@ -335,7 +329,7 @@ namespace Humper
                     continue;
                 }
 
-                if(node.IsLeaf())
+                if(node.IsLeaf)
                 {
                     Rect.RayCastInput subInput;
                     subInput.From = input.From;
@@ -392,7 +386,7 @@ namespace Humper
             // Find the best sibling for this node
             var leafRect = leaf.Rect;
             var current = _root;
-            while(current.IsLeaf() == false)
+            while(current.IsLeaf == false)
             {
                 var child1 = current.Child_1;
                 var child2 = current.Child_2;
@@ -410,7 +404,7 @@ namespace Humper
 
                 // Cost of descending into child1
                 float cost1;
-                if(child1.IsLeaf())
+                if(child1.IsLeaf)
                 {
                     var rect = Rect.Union(leafRect, child1.Rect);
                     cost1 = rect.Perimeter + inheritanceCost;
@@ -425,7 +419,7 @@ namespace Humper
 
                 // Cost of descending into child2
                 float cost2;
-                if(child2.IsLeaf())
+                if(child2.IsLeaf)
                 {
                     var rect = Rect.Union(leafRect, child2.Rect);
                     cost2 = rect.Perimeter + inheritanceCost;
@@ -579,7 +573,7 @@ namespace Humper
         /// <returns>the new root index.</returns>
         private Node Balance(Node A)
         {
-            if(A.IsLeaf() || A.Height < 2)
+            if(A.IsLeaf || A.Height < 2)
             {
                 return A;
             }
@@ -710,7 +704,7 @@ namespace Humper
         /// <returns>The height of the tree.</returns>
         public int ComputeHeight(Node node)
         {
-            if(node.IsLeaf())
+            if(node.IsLeaf)
             {
                 return 0;
             }
@@ -745,7 +739,7 @@ namespace Humper
             var child1 = node.Child_1;
             var child2 = node.Child_2;
 
-            if(node.IsLeaf())
+            if(node.IsLeaf)
             {
                 Debug.Assert(child1 == NullNode);
                 Debug.Assert(child2 == NullNode);
@@ -770,7 +764,7 @@ namespace Humper
             var child1 = node.Child_1;
             var child2 = node.Child_2;
 
-            if(node.IsLeaf())
+            if(node.IsLeaf)
             {
                 Debug.Assert(child1 == NullNode);
                 Debug.Assert(child2 == NullNode);
@@ -820,7 +814,7 @@ namespace Humper
                     continue;
                 }
 
-                if(node.IsLeaf())
+                if(node.IsLeaf)
                 {
                     node.Parent = NullNode;
                     nodes[count] = node;
@@ -892,15 +886,7 @@ namespace Humper
                 node.Rect.Max -= newOrigin;
             }
         }
-        public object GetUserData(int proxyId)
-        {
-            return _nodes[proxyId - 1].UserData;
-        }
 
-        public Node Get(int id)
-        {
-            return _nodes[id - 1];
-        }
         public class Node
         {
             internal Node Child_1;
@@ -909,16 +895,11 @@ namespace Humper
             internal int  Height;
             internal int  Id;
             internal Node Parent;
-            /// <summary>
-            ///     Enlarged AABB
-            /// </summary>
-            internal Rect Rect;
-            internal object UserData;
 
-            internal bool IsLeaf()
-            {
-                return Child_1 == NullNode;
-            }
+            internal Rect Rect;
+            public Box Box;
+
+            internal bool IsLeaf => Child_1 == NullNode;
         }
     }
 }

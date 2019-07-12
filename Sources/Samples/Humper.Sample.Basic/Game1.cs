@@ -90,9 +90,10 @@ namespace Humper.Sample.Basic
 				NextScene();
 			state = Keyboard.GetState();
 
-			//_stopwatch.Restart();
+			
+			_stopwatch.Restart();
 			scene.Update(gameTime);
-			//_stopwatch.Stop();
+			_stopwatch.Stop();
 
 			base.Update(gameTime);
 		}
@@ -105,7 +106,6 @@ namespace Humper.Sample.Basic
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			//_stopwatch.Restart();
 			graphics.GraphicsDevice.Clear(new Color(44,45,51));
 
 			spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
@@ -113,13 +113,13 @@ namespace Humper.Sample.Basic
 			scene.Draw(spriteBatch);
 
 			spriteBatch.DrawString(font, scene.Message, new Vector2(20, 20), new Color(Color.White, 0.5f));
-			spriteBatch.DrawString(font, $"ms:{_stopwatch.ElapsedMilliseconds} fps:{1000/(_stopwatch.ElapsedMilliseconds + 0.0001f)} monogame {1 / gameTime.ElapsedGameTime.TotalSeconds:##.0}", 
+
+			spriteBatch.DrawString(font, $"ms:{_stopwatch.Elapsed.TotalMilliseconds:####} fps:{1/(_stopwatch.Elapsed.TotalSeconds + 0.0001f):00.0} monogame {1 / gameTime.ElapsedGameTime.TotalSeconds:##.0}", 
 			                       new Vector2(20, 80), new Color(Color.Red, 0.5f));
 
 			spriteBatch.End();
 
 			base.Draw(gameTime);
-			//_stopwatch.Stop();
 		}
 	}
 }

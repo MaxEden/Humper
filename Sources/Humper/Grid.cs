@@ -33,7 +33,7 @@ namespace Humper
             }
         }
 
-        public IEnumerable<Box> QueryBoxes(Rect area)
+        public IList<Box> QueryBoxes(Rect area)
         {
             var cells = QueryCells(area);
             return cells.SelectMany(cell => cell.Children).Distinct().ToList();

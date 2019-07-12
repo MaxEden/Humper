@@ -14,6 +14,14 @@ namespace Humper.Sample.Basic
 {
 	public class PreviewScene : IScene
 	{
+		public enum CollisionResponses
+		{
+			None,
+			Touch,
+			Cross,
+			Slide,
+			Bounce
+		}
 		public PreviewScene()
 		{
 		}
@@ -131,7 +139,26 @@ namespace Humper.Sample.Basic
 					Hit = hit,
 				};
 
-				destination = CollisionResponse.Create(collisionPoint,r)?.Destination ?? goal;
+				switch(r)
+				{
+
+					case CollisionResponses.None:
+						break;
+					case CollisionResponses.Touch:
+						destination = Response.Touch(collisionPoint);
+						break;
+					case CollisionResponses.Cross:
+						destination = Response.Cross(collisionPoint);
+						break;
+					case CollisionResponses.Slide:
+						destination = Response.Slide(collisionPoint);
+						break;
+					case CollisionResponses.Bounce:
+						destination = Response.Bounce(collisionPoint);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
 			}
 			else
 			{

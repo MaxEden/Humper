@@ -26,6 +26,9 @@ namespace Humper.Sample.Basic
 			player1 = World.Create(new Rect(50, 50, 24, 24)).AddTags(Tags.Group3);
 			player2 = World.Create(new Rect(100, 50, 24, 24)).AddTags(Tags.Group1);
 
+			player1.IsActive = true;
+			player2.IsActive = true;
+
 			// Map
 			World.Create(new Rect(100, 100, 150, 20)).AddTags(Tags.Group2);
 			World.Create(new Rect(180, 140, 200, 200)).AddTags(Tags.Group2);
@@ -54,7 +57,7 @@ namespace Humper.Sample.Basic
 			if (k.IsKeyDown(up)) 
 				velocity.Y += 0.1f;
 			
-			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) => CollisionResponses.Slide);
+			var move = player.Move(player.Bounds.Position + delta * velocity, Response.Slide);
 			//var move = player.Move(player.Bounds.Position + new Vector2(0.05f,0.1f) *3f, (collision) => CollisionResponses.Slide);
 		}
 
