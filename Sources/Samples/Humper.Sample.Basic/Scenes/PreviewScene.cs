@@ -37,6 +37,7 @@ namespace Humper.Sample.Basic
 		private int response = 0;
 
 		private KeyboardState previous;
+		private int _height;
 
 		public string Message 
 		{ 
@@ -61,6 +62,7 @@ namespace Humper.Sample.Basic
 			sb.Draw(new Rect(destination.Center - (s / 2), s), color: Color.Green, fillOpacity: 0.0f);
 			sb.Draw(cursor, color: Color.White, fillOpacity: 0.0f);
 			sb.Draw(selected, color: Color.White, fillOpacity: 0.5f);
+			_height = sb.GraphicsDevice.Viewport.Height;
 		}
 
 		public void Initialize()
@@ -92,11 +94,12 @@ namespace Humper.Sample.Basic
 
 			isMoving = state.IsKeyDown(Keys.Space);
 			var m = Mouse.GetState().Position;
+			m.Y = _height - m.Y;
+
 			var pos = new Vector2(m.X, m.Y);
 			var size = isMoving ? 18 : 6;
 			cursor = new Rect(m.X - size/2, m.Y - size/2,size, size);
-
-
+			
 			if (isMoving)
 			{
 				selected.Position = pos - selected.Size / 2;

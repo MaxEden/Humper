@@ -72,8 +72,8 @@ namespace Humper.Sample.Basic
 			World.Create(new Rect(1004, 20, 20, 660)).AddTags(Tags.Group2);
 			World.Create(new Rect(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
-			int maxBoxes = 500;
-			int width = 2;
+			int maxBoxes = 100;
+			int width = 5;
 			for (int x = 24; x < 1000; x+=width*2)
 			{
 				for(int y = 40; y < 500; y+= width*5)
