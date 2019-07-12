@@ -16,14 +16,14 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private Box player1, player2;
+		private Box player1;//, player2;
 
 		public override void Initialize()
 		{
-			World = new World(new DynamicTree());
+			World = new World(new Grid(1024, 700));
 
-			player1 = World.Create(new Rect(50, 50, 24, 24)).AddTags(Tags.Group1);
-			player2 = World.Create(new Rect(100, 50, 24, 24)).AddTags(Tags.Group1);
+			player1 = World.Create(new Rect(50, 50, 24, 24)).AddTags(Tags.Group3);
+			//player2 = World.Create(new Rect(100, 50, 24, 24)).AddTags(Tags.Group1);
 
 			// Map
 			World.Create(new Rect(100, 100, 150, 20)).AddTags(Tags.Group2);
@@ -36,7 +36,7 @@ namespace Humper.Sample.Basic
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
 
 			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
-			UpdatePlayer(player2, delta, Keys.F, Keys.T, Keys.H, Keys.G);
+			//UpdatePlayer(player2, delta, Keys.F, Keys.T, Keys.H, Keys.G);
 		}
 
 		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
@@ -49,12 +49,12 @@ namespace Humper.Sample.Basic
 			if (k.IsKeyDown(left)) 
 				velocity.X -= 0.1f;
 			if (k.IsKeyDown(down)) 
-				velocity.Y += 0.1f;
-			if (k.IsKeyDown(up)) 
 				velocity.Y -= 0.1f;
+			if (k.IsKeyDown(up)) 
+				velocity.Y += 0.1f;
 			
 			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) => CollisionResponses.Slide);
-
+			//var move = player.Move(player.Bounds.Position + new Vector2(0.05f,0.1f) *3f, (collision) => CollisionResponses.Slide);
 		}
 
 	}

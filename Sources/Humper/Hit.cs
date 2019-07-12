@@ -44,32 +44,37 @@ namespace Humper
             var position = origin.Position;
             var normal = Vector2.Zero;
 
-            var top = origin.Center.Y - other.Top;
-            var bottom = other.Bottom - origin.Center.Y;
-            var left = origin.Center.X - other.Left;
-            var right = other.Right - origin.Center.X;
+            //var top = Mathf.Abs(other.Top - origin.Center.Y);
+            //var bottom = Mathf.Abs(other.Bottom - origin.Center.Y);
+            //var left = Mathf.Abs(other.Left - origin.Center.X);
+            //var right = Mathf.Abs(other.Right - origin.Center.X);
 
-            var min = Math.Min(top, Math.Min(bottom, Math.Min(right, left)));
+            var top = Mathf.Abs(other.Top - origin.Bottom);
+            var bottom = Mathf.Abs(other.Bottom - origin.Top);
+            var left = Mathf.Abs(other.Left - origin.Right);
+            var right = Mathf.Abs(other.Right - origin.Left);
 
-            if(Math.Abs(min - top) < Constants.Threshold)
+            var index = Mathf.MinIndex(top, bottom, left, right);
+
+            if(index == 0)
             {
-                normal = -Vector2.UnitY;
-                position = new Vector2(position.X, other.Top - origin.Height);
+                normal = Vector2.up;
+                position = new Vector2(origin.X, other.Top + Constants.Threshold);
             }
-            else if(Math.Abs(min - bottom) < Constants.Threshold)
+            else if(index == 1)
             {
-                normal = Vector2.UnitY;
-                position = new Vector2(position.X, other.Bottom);
+                normal = Vector2.down;
+                position = new Vector2(origin.X, other.Bottom - origin.Height - Constants.Threshold);
             }
-            else if(Math.Abs(min - left) < Constants.Threshold)
+            else if(index == 2)
             {
-                normal = -Vector2.UnitX;
-                position = new Vector2(other.Left - origin.Width, position.Y);
+                normal = Vector2.left;
+                position = new Vector2(other.Left - origin.Width  - Constants.Threshold, origin.Y);
             }
-            else if(Math.Abs(min - right) < Constants.Threshold)
+            else if(index == 3)
             {
-                normal = Vector2.UnitX;
-                position = new Vector2(other.Right, position.Y);
+                normal = Vector2.right;
+                position = new Vector2(other.Right  + Constants.Threshold, origin.Y);
             }
 
             return (position, normal);
@@ -81,13 +86,15 @@ namespace Humper
             if(other.Contains(origin) || other.Overlaps(origin))
             {
                 var outside = PushOutside(origin, other);
-                return new Hit
-                {
-                    Amount = 0,
-                    Position = outside.position,
-                    Normal = outside.normal
-                };
+                origin.Position = outside.position;
+                //return new Hit
+                //{
+                //    Amount = 0,
+                //    Position = outside.position,
+                //    Normal = outside.normal
+                //};
             }
+            //return null;
 
             var velocity = destination.Position - origin.Position;
 
@@ -106,13 +113,13 @@ namespace Humper
 
             if(velocity.Y > 0)
             {
-                invEntry.Y = other.Top - origin.Bottom;
-                invExit.Y = other.Bottom - origin.Top;
+                invEntry.Y = other.Bottom - origin.Top;
+                invExit.Y = other.Top - origin.Bottom;
             }
             else
             {
-                invEntry.Y = other.Bottom - origin.Top;
-                invExit.Y = other.Top - origin.Bottom;
+                invEntry.Y = other.Top - origin.Bottom;
+                invExit.Y = other.Bottom - origin.Top;
             }
 
             if(Math.Abs(velocity.X) < Constants.Threshold)
@@ -146,7 +153,7 @@ namespace Humper
             if(
                 entryTime > exitTime || entry.X < 0.0f && entry.Y < 0.0f ||
                 entry.X < 0.0f && (origin.Right < other.Left || origin.Left > other.Right) ||
-                entry.Y < 0.0f && (origin.Bottom < other.Top || origin.Top > other.Bottom))
+                entry.Y < 0.0f && (origin.Top < other.Bottom || origin.Bottom > other.Top))
             {
                 return null;
             }

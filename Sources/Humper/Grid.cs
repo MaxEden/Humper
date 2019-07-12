@@ -36,9 +36,9 @@ namespace Humper
         public IEnumerable<Box> QueryBoxes(Rect area)
         {
             var cells = QueryCells(area);
-            return cells.SelectMany(cell => cell.Children).Distinct();
+            return cells.SelectMany(cell => cell.Children).Distinct().ToList();
         }
-        public Rect Bounds => new Rect(0, 0, Width * CellSize, Height * CellSize);
+        public Rect Bounds => new Rect(0, 0, Cells.GetLength(0) * CellSize, Cells.GetLength(1) * CellSize);
 
         public void Add(Box box)
         {
@@ -81,12 +81,12 @@ namespace Humper
             return removed;
         }
 
-        public IEnumerable<Cell> QueryCells(Rect area)
+        public List<Cell> QueryCells(Rect area)
         {
             var minX = (int)(area.Left / CellSize);
-            var minY = (int)(area.Top / CellSize);
-            var maxX = (int)(area.Right / CellSize) + 1;
-            var maxY = (int)(area.Bottom / CellSize) + 1;
+            var minY = (int)(area.Bottom / CellSize);
+            var maxX = (int)(area.Right / CellSize);
+            var maxY = (int)(area.Top / CellSize);
 
             minX = Math.Max(0, minX);
             minY = Math.Max(0, minY);

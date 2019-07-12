@@ -11,46 +11,36 @@ namespace Humper.Sample.Basic
 	{
 		private static Texture2D pixel;
 
-		public static Rectangle ToRectangle(this Rect r)
+		public static Rectangle ToRectangle(this SpriteBatch spriteBatch, Rect r)
 		{
-			return new Rectangle((int)r.X,-(int)r.Y,(int)r.Width,(int)r.Height);
+			return new Rectangle((int)r.X,spriteBatch.GraphicsDevice.Viewport.Height - (int)(r.Y + r.Height),(int)r.Width,(int)r.Height);
 		}
 
 		public static void Draw(this SpriteBatch spriteBatch, Rect rect, Color color)
 		{
-			spriteBatch.Draw(rect.ToRectangle(), color);
+			if (pixel == null)
+			{
+				pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+				pixel.SetData(new Color[] { Color.White });
+			}
+
+			spriteBatch.Draw(pixel, destinationRectangle: spriteBatch.ToRectangle(rect), color: color);
 		}
 
 		public static void Draw(this SpriteBatch spriteBatch, Rect rect, Color color, float fillOpacity)
 		{
-			spriteBatch.Draw(rect.ToRectangle(), color, fillOpacity);
-		}
-
-		public static void Draw(this SpriteBatch spriteBatch, Rectangle rect, Color color)
-		{
 			if (pixel == null)
 			{
 				pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
 				pixel.SetData(new Color[] { Color.White });
 			}
 
-			spriteBatch.Draw(pixel, destinationRectangle: rect, color: color);
-		}
-
-		public static void Draw(this SpriteBatch spriteBatch, Rectangle rect, Color stroke, float fillOpacity)
-		{
-			if (pixel == null)
-			{
-				pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-				pixel.SetData(new Color[] { Color.White });
-			}
-
-			var fill = new Color(stroke, fillOpacity);
+			var fill = new Color(color, fillOpacity);
 			spriteBatch.DrawFill(rect, fill);
-			spriteBatch.DrawStroke(rect, stroke);
+			spriteBatch.DrawStroke(rect, color);
 		}
 
-		public static void DrawFill(this SpriteBatch spriteBatch, Rectangle rect, Color fill)
+		public static void DrawFill(this SpriteBatch spriteBatch, Rect rect, Color fill)
 		{
 			if (pixel == null)
 			{
@@ -58,10 +48,10 @@ namespace Humper.Sample.Basic
 				pixel.SetData(new Color[] { Color.White });
 			}
 
-			spriteBatch.Draw(pixel, destinationRectangle: rect, color: fill);
+			spriteBatch.Draw(pixel, destinationRectangle: spriteBatch.ToRectangle(rect), color: fill);
 		}
 
-		public static void DrawStroke(this SpriteBatch spriteBatch, Rectangle rect, Color stroke)
+		public static void DrawStroke(this SpriteBatch spriteBatch, Rect rect, Color stroke)
 		{
 			if (pixel == null)
 			{
@@ -69,15 +59,15 @@ namespace Humper.Sample.Basic
 				pixel.SetData(new Color[] { Color.White });
 			}
 
-			var left = new Rectangle(rect.Left, rect.Top, 1, rect.Height);
-			var right = new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height);
-			var top = new Rectangle(rect.Left, rect.Top, rect.Width, 1);
-			var bottom = new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1);
+			var left = new Rect((int)rect.Left, (int)rect.Bottom, 1,(int) rect.Height);
+			var right = new Rect((int)rect.Right, (int)rect.Bottom, 1, (int)rect.Height);
+			var top = new Rect((int)rect.Left, (int)rect.Top, (int)rect.Width, 1);
+			var bottom = new Rect((int)rect.Left, (int)rect.Bottom, (int)rect.Width, 1);
 
-			spriteBatch.Draw(pixel, destinationRectangle: left, color: stroke);
-			spriteBatch.Draw(pixel, destinationRectangle: right, color: stroke);
-			spriteBatch.Draw(pixel, destinationRectangle: top, color: stroke);
-			spriteBatch.Draw(pixel, destinationRectangle: bottom, color: stroke);
+			spriteBatch.Draw(pixel, destinationRectangle: spriteBatch.ToRectangle(left), color: stroke);
+			spriteBatch.Draw(pixel, destinationRectangle: spriteBatch.ToRectangle(right), color: stroke);
+			spriteBatch.Draw(pixel, destinationRectangle: spriteBatch.ToRectangle(top), color: stroke);
+			spriteBatch.Draw(pixel, destinationRectangle: spriteBatch.ToRectangle(bottom), color: stroke);
 		}
 	}
 }

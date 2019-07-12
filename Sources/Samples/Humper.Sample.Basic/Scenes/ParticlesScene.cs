@@ -30,7 +30,7 @@ namespace Humper.Sample.Basic
 
 			public void Update(float delta)
 			{
-				Velocity = Velocity + Vector2.up * delta * 0.001f;
+				Velocity = Velocity + Vector2.down * delta * 0.001f;
 
 				var move = Box.Move(
 					delta*Velocity + Box.Bounds.Position, (collision) =>
@@ -130,7 +130,7 @@ namespace Humper.Sample.Basic
 			if (k.IsKeyDown(left))
 				velocity.X -= 0.1f;
 			if (state.IsKeyUp(up) && k.IsKeyDown(up))
-				velocity.Y -= 0.5f;
+				velocity.Y += 0.5f;
 
 			// Moving player
 			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) =>

@@ -35,12 +35,16 @@ namespace Humper.Sample.Basic
 			var b = World.Bounds;
 			spriteBatch = sb;
 			World.DrawDebug(b, DrawCell, DrawBox, DrawString);
+
+			
+			spriteBatch.Draw(new Rect(Mandarin.Common.Misc.Vector2.Zero, Mandarin.Common.Misc.Vector2.One*5f), Color.Red, 1f);
+			spriteBatch.Draw(new Rect(Mandarin.Common.Misc.Vector2.up * 100, Mandarin.Common.Misc.Vector2.One*5f), Color.Blue, 1f);
 		}
 
 		private void DrawCell(Rect rect, float alpha)
 		{
 			if (Keyboard.GetState().IsKeyDown(Keys.Space))
-				spriteBatch.DrawStroke(rect.ToRectangle(), new Color(Color.White, alpha));
+				spriteBatch.DrawStroke(rect, new Color(Color.White, alpha));
 		}
 
 		private void DrawBox(Box box)
@@ -70,7 +74,7 @@ namespace Humper.Sample.Basic
 		{
 			var size = font.MeasureString(message);
 			if (Keyboard.GetState().IsKeyDown(Keys.Space))
-				spriteBatch.DrawString(font, message, new Vector2(x - size.X / 2, y - size.Y / 2), new Color(Color.White, alpha));
+				spriteBatch.DrawString(font, message, new Vector2(x - size.X / 2, spriteBatch.GraphicsDevice.Viewport.Height - (y - size.Y / 2)), new Color(Color.White, alpha));
 		}
 
 		public abstract void Initialize();

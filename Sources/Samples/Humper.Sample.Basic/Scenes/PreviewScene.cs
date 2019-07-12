@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Color = Microsoft.Xna.Framework.Color;
 using Vector2 = Mandarin.Common.Misc.Vector2;
+using Humper.Sample.Basic;
 
 namespace Humper.Sample.Basic
 {
