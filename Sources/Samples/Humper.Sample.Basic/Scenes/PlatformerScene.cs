@@ -71,7 +71,8 @@ namespace Humper.Sample.Basic
 
 		public override void Initialize()
 		{
-			World = new World(new Grid(1024, 700));
+			//World = new World(new Grid(1024, 700));
+			World = new World(new DynamicTree());
 
 			SpawnPlayer();
 

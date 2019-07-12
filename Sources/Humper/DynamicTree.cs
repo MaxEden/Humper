@@ -154,11 +154,11 @@ namespace Humper
         }
         void IBroadPhase.DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
         {
-            Query(p =>
+            drawCell(_root.Rect, 1);
+            foreach(var node in QueryNodes(area))
             {
-                drawCell(p.Rect, 0.25f);
-                return true;
-            }, area);
+                drawCell(node.Rect, 0.5f);
+            }
         }
 
         /// <summary>
@@ -260,6 +260,20 @@ namespace Humper
                     }
                 }
             }
+        }
+
+        public IEnumerable<Node> QueryNodes(Rect rect)
+        {
+            var nodes = new List<Node>();
+            QueryNodes(_root, rect, nodes);
+            return nodes;
+        }
+        private void QueryNodes(Node node, Rect rect, IList<Node> nodes)
+        {
+           if(node == NullNode) return;
+           nodes.Add(node);
+           QueryNodes(node.Child_1, rect, nodes);
+           QueryNodes(node.Child_2, rect, nodes);
         }
 
         /// <summary>
