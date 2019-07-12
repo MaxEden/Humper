@@ -43,7 +43,6 @@ namespace Humper
 
         internal const   Node        NullNode = null;
         private readonly List<Node>  _nodes;
-        private readonly Stack<Node> _queryStack   = new Stack<Node>();
         private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
 
@@ -143,13 +142,22 @@ namespace Humper
         IList<Box> IBroadPhase.QueryBoxes(Rect area)
         {
             var result = new List<Box>();
-            Query(p =>
-            {
-                result.Add(p.Box);
-                return true;
-            }, area);
-
+            QueryBoxes(_root, area, result);
             return result;
+        }
+        private void QueryBoxes(Node node, Rect rect, IList<Box> boxes)
+        {
+            if(node == NullNode) return;
+            if(!node.Rect.Overlaps(rect)) return;
+
+            if(node.IsLeaf)
+            {
+                boxes.Add(node.Box);
+                return;
+            }
+
+            QueryBoxes(node.Child_1, rect, boxes);
+            QueryBoxes(node.Child_2, rect, boxes);
         }
         Rect IBroadPhase.Bounds => _root?.Rect ?? Rect.Empty;
         bool IBroadPhase.Remove(Box box)
@@ -217,45 +225,7 @@ namespace Humper
             InsertLeaf(node);
             return true;
         }
-
-        /// <summary>
-        ///     Query an AABB for overlapping proxies. The callback class
-        ///     is called for each proxy that overlaps the supplied AABB.
-        /// </summary>
-        /// <param name="callback">The callback.</param>
-        /// <param name="rect">The AABB.</param>
-        public void Query(Func<Node, bool> callback, Rect rect)
-        {
-            _queryStack.Clear();
-            _queryStack.Push(_root);
-
-            while(_queryStack.Count > 0)
-            {
-                var node = _queryStack.Pop();
-                if(node == NullNode)
-                {
-                    continue;
-                }
-
-                if(node.Rect.Overlaps(rect))
-                {
-                    if(node.IsLeaf)
-                    {
-                        var proceed = callback(node);
-                        if(proceed == false)
-                        {
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        _queryStack.Push(node.Child_1);
-                        _queryStack.Push(node.Child_2);
-                    }
-                }
-            }
-        }
-
+        
         public IEnumerable<Node> QueryNodes(Rect rect)
         {
             var nodes = new List<Node>();
@@ -265,7 +235,10 @@ namespace Humper
         private void QueryNodes(Node node, Rect rect, IList<Node> nodes)
         {
             if(node == NullNode) return;
+            if(!node.Rect.Overlaps(rect)) return;
+
             nodes.Add(node);
+
             QueryNodes(node.Child_1, rect, nodes);
             QueryNodes(node.Child_2, rect, nodes);
         }
