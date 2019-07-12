@@ -65,56 +65,6 @@ namespace Humper
 
         #region Hits
 
-        public IHit Hit(Vector2 point, IEnumerable<Box> ignoring = null)
-        {
-            var boxes = _broadPhase.QueryBoxes(new Rect(point, Vector2.Zero));
-
-            if(ignoring != null)
-            {
-                boxes = boxes.Except(ignoring);
-            }
-
-            foreach(var other in boxes)
-            {
-                var hit = Humper.Hit.Resolve(point, other);
-
-                if(hit != null)
-                {
-                    return hit;
-                }
-            }
-
-            return null;
-        }
-
-        public IHit Hit(Vector2 origin, Vector2 destination, IEnumerable<Box> ignoring = null)
-        {
-            var min = Vector2.Min(origin, destination);
-            var max = Vector2.Max(origin, destination);
-
-            var wrap = Rect.FromMinMax(min, max);
-            var boxes = Find(wrap);
-
-            if(ignoring != null)
-            {
-                boxes = boxes.Except(ignoring);
-            }
-
-            IHit nearest = null;
-
-            foreach(var other in boxes)
-            {
-                var hit = Humper.Hit.Resolve(origin, destination, other);
-
-                if(hit != null && (nearest == null || hit.IsNearest(nearest, origin)))
-                {
-                    nearest = hit;
-                }
-            }
-
-            return nearest;
-        }
-
         public IHit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
         {
             var wrap = Rect.Union(origin, destination);
