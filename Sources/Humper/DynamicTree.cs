@@ -44,6 +44,7 @@ namespace Humper
         private readonly List<Node>  _nodes;
         private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
+        private int _uk = 1;
 
         /// <summary>
         ///     Compute the height of the binary tree in O(N) time. Should not be called often.
@@ -338,7 +339,7 @@ namespace Humper
         {
             var node = new Node();
             _nodes.Add(node);
-            node.Id = _nodes.Count;
+            node.Id = _uk++;
             return node;
         }
 
@@ -874,6 +875,23 @@ namespace Humper
             public Box Box;
 
             internal bool IsLeaf => Child_1 == null;
+
+            public override string ToString()
+            {
+                return Id.ToString();
+            }
+
+            public void SetChild_1(Node node)
+            {
+                node.Parent = this;
+                Child_1 = node;
+            }
+
+            public void SetChild_2(Node node)
+            {
+                node.Parent = this;
+                Child_2 = node;
+            }
         }
     }
 }
