@@ -235,94 +235,56 @@ namespace Humper
             QueryNodes(node.Child_2, rect, nodes);
         }
 
-        /// <summary>
-        ///     Ray-cast against the proxies in the tree. This relies on the callback
-        ///     to perform a exact ray-cast in the case were the proxy contains a Shape.
-        ///     The callback also performs the any collision filtering. This has performance
-        ///     roughly equal to k * log(n), where k is the number of collisions and n is the
-        ///     number of proxies in the tree.
-        /// </summary>
-        /// <param name="callback">A callback class that is called for each proxy that is hit by the ray.</param>
-        /// <param name="input">The ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).</param>
-        public void RayCast(Func<Rect.RayCastInput, Node, float> callback, Rect.RayCastInput input)
+        public List<Box> RayCastBoxes(Rect.RayCastInput input)
         {
-            var p1 = input.From;
-            var p2 = input.To;
-            var r = p2 - p1;
-            Debug.Assert(r.LengthSquared() > 0.0f);
-            r.Normalize();
+            var boxes = new List<Box>();
+            RayCastBoxes(_root, input, boxes);
+            return boxes;
+        }
 
-            // v is perpendicular to the segment.
-            var absV = Vector2.Abs(new Vector2(-r.Y, r.X)); //Velcro: Inlined the 'v' variable
-
-            // Separating axis for segment (Gino, p80).
-            // |dot(v, p1 - c)| > dot(|v|, h)
-
-            var maxFraction = input.MaxFraction;
+        private void RayCastBoxes(Node node, Rect.RayCastInput input, List<Box> boxes)
+        {
+            if(node == null)
+            {
+                return;
+            }
 
             // Build a bounding box for the segment.
-            
-                var t = p1 + maxFraction * (p2 - p1);
-                var segmentRect = Rect.FromMinMax(
-                    Vector2.Min(p1, t),
-                    Vector2.Max(p1, t));
+            var segmentRect = Rect.FromMinMax(
+                Vector2.Min(input.From, input.To),
+                Vector2.Max(input.From, input.To));
 
-            _raycastStack.Clear();
-            _raycastStack.Push(_root);
-
-            while(_raycastStack.Count > 0)
+            if(!node.Rect.Overlaps(segmentRect))
             {
-                var node = _raycastStack.Pop();
-                if(node == null)
-                {
-                    continue;
-                }
+                return;
+            }
 
-                if(node.Rect.Overlaps(segmentRect) == false)
-                {
-                    continue;
-                }
+            var ray = input.To - input.From;
 
-                // Separating axis for segment (Gino, p80).
-                // |dot(v, p1 - c)| > dot(|v|, h)
-                var c = node.Rect.Center;
-                var h = node.Rect.Extents;
-                var separation = Math.Abs(Vector2.Dot(new Vector2(-r.Y, r.X), p1 - c)) - Vector2.Dot(absV, h);
-                if(separation > 0.0f)
-                {
-                    continue;
-                }
+            Debug.Assert(ray.LengthSquared() > 0.0f);
+            ray.Normalize();
 
-                if(node.IsLeaf)
-                {
-                    Rect.RayCastInput subInput;
-                    subInput.From = input.From;
-                    subInput.To = input.To;
-                    subInput.MaxFraction = maxFraction;
+            // v is perpendicular to the segment.
+            var v = new Vector2(-ray.Y, ray.X);
+            var absV = Vector2.Abs(v);
+            
+            // Separating axis for segment (Gino, p80).
+            // |dot(v, p1 - c)| > dot(|v|, h)
+            var separation = Math.Abs(Vector2.Dot(v, input.From - node.Rect.Center)) - Vector2.Dot(absV, node.Rect.Extents);
 
-                    var value = callback(subInput, node);
+            if(separation > 0.0f)
+            {
+                return;
+            }
 
-                    if(value == 0.0f)
-                    {
-                        // the client has terminated the raycast.
-                        return;
-                    }
-
-                    if(value > 0.0f)
-                    {
-                        // Update segment bounding box.
-                        maxFraction = value;
-                        t = p1 + maxFraction * (p2 - p1);
-                        segmentRect = Rect.FromMinMax(
-                            Vector2.Min(p1, t),
-                            Vector2.Max(p1, t));
-                    }
-                }
-                else
-                {
-                    _raycastStack.Push(node.Child_1);
-                    _raycastStack.Push(node.Child_2);
-                }
+            if(node.IsLeaf)
+            {
+                boxes.Add(node.Box);
+            }
+            else
+            {
+                RayCastBoxes(node.Child_1, input, boxes);
+                RayCastBoxes(node.Child_2, input, boxes);
             }
         }
 
