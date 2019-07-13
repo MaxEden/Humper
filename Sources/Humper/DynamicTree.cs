@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Humper.Base;
 using Mandarin.Common.Misc;
 
@@ -36,15 +37,15 @@ namespace Humper
     ///     object to move by small amounts without triggering a tree update.
     ///     Nodes are pooled and relocatable, so we use node indices rather than pointers.
     /// </summary>
-    public class DynamicTree : IBroadPhase
+    public partial class DynamicTree : IBroadPhase
     {
         public Vector2 RectExtension                    = Vector2.One * 4;
         public Vector2 DisplacementPredictionMultiplier = Vector2.One * 10;
 
-        private readonly List<Node>  _nodes;
+        private readonly List<Node>  _nodes        = new List<Node>();
         private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
-        private int _uk = 1;
+        private          int         _uk = 1;
 
         /// <summary>
         ///     Compute the height of the binary tree in O(N) time. Should not be called often.
@@ -119,26 +120,15 @@ namespace Humper
             }
         }
 
-        /// <summary>
-        ///     Constructing the tree initializes the node pool.
-        /// </summary>
-        public DynamicTree()
-        {
-            _root = null;
-            _nodes = new List<Node>();
-        }
         public void Add(Box box)
         {
-
             var node = AllocateNode();
 
             node.Box = box;
-
-            node.Rect = box.IsActive ? box.Bounds.Expand(RectExtension) : box.Bounds;
-            node.Height = 0;
+            node.Tree = this;
+            node.SetRect(box.IsActive ? box.Bounds.Expand(RectExtension) : box.Bounds);
 
             InsertLeaf(node);
-            box.BroadPhaseData = node;
         }
         public IList<Box> QueryBoxes(Rect area)
         {
@@ -163,11 +153,11 @@ namespace Humper
         Rect IBroadPhase.Bounds => _root?.Rect ?? Rect.Empty;
         public bool Remove(Box box)
         {
-            return RemoveProxy((Node)box.BroadPhaseData);
+            return RemoveProxy(GetProxy(box));
         }
         public void Update(Box box, Rect from)
         {
-            MoveProxy((Node)box.BroadPhaseData, from, box.Bounds.Position - from.Position);
+            MoveProxy(GetProxy(box), from, box.Bounds.Position - from.Position);
         }
         void IBroadPhase.DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
         {
@@ -181,9 +171,10 @@ namespace Humper
         /// <summary>
         ///     Destroy a proxy. This asserts if the id is invalid.
         /// </summary>
-        public bool RemoveProxy(Node node)
+        private bool RemoveProxy(Node node)
         {
             Debug.Assert(node.IsLeaf);
+            Debug.Assert(node.Tree == this);
 
             RemoveLeaf(node);
             return FreeNode(node);
@@ -198,7 +189,7 @@ namespace Humper
         /// <param name="rect">The AABB.</param>
         /// <param name="displacement">The displacement.</param>
         /// <returns>true if the proxy was re-inserted.</returns>
-        public bool MoveProxy(Node node, Rect rect, Vector2 displacement)
+        private bool MoveProxy(Node node, Rect rect, Vector2 displacement)
         {
             Debug.Assert(node.IsLeaf);
 
@@ -209,7 +200,7 @@ namespace Humper
 
             RemoveLeaf(node);
 
-            
+
             var newRect = rect;
 
             if(node.Box.IsActive)
@@ -218,15 +209,15 @@ namespace Humper
                     .Offset(DisplacementPredictionMultiplier * displacement)
                     .Expand(RectExtension);
 
-                newRect = Rect.Union(rect,newRect);
+                newRect = Rect.Union(rect, newRect);
             }
 
-            node.Rect = newRect;
+            node.SetRect(newRect);
 
             InsertLeaf(node);
             return true;
         }
-        
+
         public IEnumerable<Node> QueryNodes(Rect rect)
         {
             var nodes = new List<Node>();
@@ -270,12 +261,11 @@ namespace Humper
             var maxFraction = input.MaxFraction;
 
             // Build a bounding box for the segment.
-            var segmentRect = new Rect();
-            {
+            
                 var t = p1 + maxFraction * (p2 - p1);
-                segmentRect.Min = Vector2.Min(p1, t);
-                segmentRect.Max = Vector2.Max(p1, t);
-            }
+                var segmentRect = Rect.FromMinMax(
+                    Vector2.Min(p1, t),
+                    Vector2.Max(p1, t));
 
             _raycastStack.Clear();
             _raycastStack.Push(_root);
@@ -322,9 +312,10 @@ namespace Humper
                     {
                         // Update segment bounding box.
                         maxFraction = value;
-                        var t = p1 + maxFraction * (p2 - p1);
-                        segmentRect.Min = Vector2.Min(p1, t);
-                        segmentRect.Max = Vector2.Max(p1, t);
+                        t = p1 + maxFraction * (p2 - p1);
+                        segmentRect = Rect.FromMinMax(
+                            Vector2.Min(p1, t),
+                            Vector2.Max(p1, t));
                     }
                 }
                 else
@@ -348,14 +339,23 @@ namespace Humper
             return _nodes.Remove(node);
         }
 
+        private void MakeRoot(Node node)
+        {
+            node.MakeOrphan();
+            _root = node;
+        }
+
         private void InsertLeaf(Node leaf)
         {
+            //try
+            //{
             if(_root == null)
             {
-                _root = leaf;
-                _root.Parent = null;
+                MakeRoot(leaf);
                 return;
             }
+
+            //ValidateStructure(leaf);
 
             // Find the best sibling for this node
             var leafRect = leaf.Rect;
@@ -421,44 +421,31 @@ namespace Humper
                 {
                     current = child2;
                 }
+
+                //ValidateStructure(current);
             }
 
             var sibling = current;
 
             // Create a new parent.
             var oldParent = sibling.Parent;
-
             var newParent = AllocateNode();
-            newParent.Parent = oldParent;
-            newParent.Rect = Rect.Union(leafRect, sibling.Rect);
-            newParent.Height = sibling.Height + 1;
 
             if(oldParent != null)
             {
                 // The sibling was not the root.
-                if(oldParent.Child_1 == sibling)
-                {
-                    oldParent.Child_1 = newParent;
-                }
-                else
-                {
-                    oldParent.Child_2 = newParent;
-                }
-
-                newParent.Child_1 = sibling;
-                newParent.Child_2 = leaf;
-                sibling.Parent = newParent;
-                leaf.Parent = newParent;
+                oldParent.SetChild(sibling, newParent);
             }
             else
             {
                 // The sibling was the root.
-                newParent.Child_1 = sibling;
-                newParent.Child_2 = leaf;
-                sibling.Parent = newParent;
-                leaf.Parent = newParent;
-                _root = newParent;
+                MakeRoot(newParent);
             }
+
+            newParent.SetChild_1(sibling);
+            newParent.SetChild_2(leaf);
+
+            //ValidateStructure(sibling, leaf, oldParent, newParent);
 
             // Walk back up the tree fixing heights and AABBs
             current = leaf.Parent;
@@ -466,26 +453,28 @@ namespace Humper
             {
                 current = Balance(current);
 
-                var child1 = current.Child_1;
-                var child2 = current.Child_2;
-
-                Debug.Assert(child1 != null);
-                Debug.Assert(child2 != null);
-
-                current.Height = 1 + Math.Max(child1.Height, child2.Height);
-                current.Rect = Rect.Union(child1.Rect, child2.Rect);
+                Debug.Assert(current.Child_1 != null);
+                Debug.Assert(current.Child_2 != null);
 
                 current = current.Parent;
+                //ValidateStructure(sibling, leaf, oldParent, newParent);
             }
 
-            Validate();
+            //}
+            //finally
+            //{
+            //    Validate();
+            //}
         }
 
         private void RemoveLeaf(Node leaf)
         {
+            //try
+            //{
             if(leaf == _root)
             {
                 _root = null;
+                FreeNode(leaf);
                 return;
             }
 
@@ -502,43 +491,42 @@ namespace Humper
                 sibling = parent.Child_1;
             }
 
+            //ValidateStructure(grandParent, parent, leaf);
+
             if(grandParent != null)
             {
                 // Destroy parent and connect sibling to grandParent.
                 if(grandParent.Child_1 == parent)
                 {
-                    grandParent.Child_1 = sibling;
+                    grandParent.SetChild_1(sibling);
                 }
                 else
                 {
-                    grandParent.Child_2 = sibling;
+                    grandParent.SetChild_2(sibling);
                 }
-                sibling.Parent = grandParent;
+                //ValidateStructure(grandParent);
                 FreeNode(parent);
 
                 // Adjust ancestor bounds.
                 var current = grandParent;
                 while(current != null)
                 {
+                    //ValidateStructure(current);
                     current = Balance(current);
-
-                    var child1 = current.Child_1;
-                    var child2 = current.Child_2;
-
-                    current.Rect = Rect.Union(child1.Rect, child2.Rect);
-                    current.Height = 1 + Math.Max(child1.Height, child2.Height);
 
                     current = current.Parent;
                 }
             }
             else
             {
-                _root = sibling;
-                sibling.Parent = null;
+                MakeRoot(sibling);
                 FreeNode(parent);
             }
-
-            //Validate();
+            //}
+            //finally
+            //{
+            //    Validate();
+            //}
         }
 
         /// <summary>
@@ -548,6 +536,8 @@ namespace Humper
         /// <returns>the new root index.</returns>
         private Node Balance(Node A)
         {
+            //    try
+            //    {
             if(A.IsLeaf || A.Height < 2)
             {
                 return A;
@@ -558,6 +548,9 @@ namespace Humper
 
             var balance = C.Height - B.Height;
 
+
+            //ValidateStructure(A, B, C);
+
             // Rotate C up
             if(balance > 1)
             {
@@ -565,51 +558,22 @@ namespace Humper
                 var G = C.Child_2;
 
                 // Swap A and C
-                C.Child_1 = A;
-                C.Parent = A.Parent;
-                A.Parent = C;
-
-                // A's old parent should point to C
-                if(C.Parent != null)
-                {
-                    if(C.Parent.Child_1 == A)
-                    {
-                        C.Parent.Child_1 = C;
-                    }
-                    else
-                    {
-                        C.Parent.Child_2 = C;
-                    }
-                }
-                else
-                {
-                    _root = C;
-                }
+                Node.Swap(C, A, ref _root);
 
                 // Rotate
                 if(F.Height > G.Height)
                 {
-                    C.Child_2 = F;
-                    A.Child_2 = G;
-                    G.Parent = A;
-                    A.Rect = Rect.Union(B.Rect, G.Rect);
-                    C.Rect = Rect.Union(A.Rect, F.Rect);
-
-                    A.Height = 1 + Math.Max(B.Height, G.Height);
-                    C.Height = 1 + Math.Max(A.Height, F.Height);
+                    C.SetChild_2(F);
+                    A.SetChild_2(G);
                 }
                 else
                 {
-                    C.Child_2 = G;
-                    A.Child_2 = F;
-                    F.Parent = A;
-                    A.Rect = Rect.Union(B.Rect, F.Rect);
-                    C.Rect = Rect.Union(A.Rect, G.Rect);
-
-                    A.Height = 1 + Math.Max(B.Height, F.Height);
-                    C.Height = 1 + Math.Max(A.Height, G.Height);
+                    C.SetChild_2(G);
+                    A.SetChild_2(F);
                 }
 
+
+                //ValidateStructure(A, B, C, F, G);
                 return C;
             }
 
@@ -620,56 +584,32 @@ namespace Humper
                 var E = B.Child_2;
 
                 // Swap A and B
-                B.Child_1 = A;
-                B.Parent = A.Parent;
-                A.Parent = B;
-
-                // A's old parent should point to B
-                if(B.Parent != null)
-                {
-                    if(B.Parent.Child_1 == A)
-                    {
-                        B.Parent.Child_1 = B;
-                    }
-                    else
-                    {
-                        Debug.Assert(B.Parent.Child_2 == A);
-                        B.Parent.Child_2 = B;
-                    }
-                }
-                else
-                {
-                    _root = B;
-                }
+                Node.Swap(B, A, ref _root);
 
                 // Rotate
                 if(D.Height > E.Height)
                 {
-                    B.Child_2 = D;
-                    A.Child_1 = E;
-                    E.Parent = A;
-                    A.Rect = Rect.Union(C.Rect, E.Rect);
-                    B.Rect = Rect.Union(A.Rect, D.Rect);
-
-                    A.Height = 1 + Math.Max(C.Height, E.Height);
-                    B.Height = 1 + Math.Max(A.Height, D.Height);
+                    B.SetChild_2(D);
+                    A.SetChild_1(E);
                 }
                 else
                 {
-                    B.Child_2 = E;
-                    A.Child_1 = D;
-                    D.Parent = A;
-                    A.Rect = Rect.Union(C.Rect, D.Rect);
-                    B.Rect = Rect.Union(A.Rect, E.Rect);
-
-                    A.Height = 1 + Math.Max(C.Height, D.Height);
-                    B.Height = 1 + Math.Max(A.Height, E.Height);
+                    B.SetChild_2(E);
+                    A.SetChild_1(D);
                 }
 
+                //ValidateStructure(A, B, C, D, E);
                 return B;
             }
 
+            //ValidateStructure(A, B, C);
+
             return A;
+            //}
+            //finally
+            //{
+            //    Validate();
+            //}
         }
 
         /// <summary>
@@ -695,8 +635,18 @@ namespace Humper
         /// <returns>The height of the tree.</returns>
         public int ComputeHeight()
         {
+            if(_root == null && _nodes.Count == 0) return 0;
             var height = ComputeHeight(_root);
             return height;
+        }
+
+        public void ValidateStructure(params Node[] nodes)
+        {
+            foreach(var node in nodes)
+            {
+                if(node == null) continue;
+                ValidateStructure(node);
+            }
         }
 
         public void ValidateStructure(Node node)
@@ -791,7 +741,7 @@ namespace Humper
 
                 if(node.IsLeaf)
                 {
-                    node.Parent = null;
+                    node.MakeOrphan();
                     nodes[count] = node;
                     ++count;
                 }
@@ -827,14 +777,8 @@ namespace Humper
                 var child2 = nodes[jMin];
 
                 var parent = AllocateNode();
-                parent.Child_1 = child1;
-                parent.Child_2 = child2;
-                parent.Height = 1 + Math.Max(child1.Height, child2.Height);
-                parent.Rect = Rect.Union(child1.Rect, child2.Rect);
-                parent.Parent = null;
-
-                child1.Parent = parent;
-                child2.Parent = parent;
+                parent.SetChild_1(child1);
+                parent.SetChild_2(child2);
 
                 nodes[jMin] = nodes[count - 1];
                 nodes[iMin] = parent;
@@ -847,51 +791,9 @@ namespace Humper
 
             Validate();
         }
-
-        /// <summary>
-        ///     Shift the origin of the nodes
-        /// </summary>
-        /// <param name="newOrigin">The displacement to use.</param>
-        public void ShiftOrigin(Vector2 newOrigin)
+        public Node GetProxy(Box box)
         {
-            // Build array of leaves. Free the rest.
-            foreach(var node in _nodes)
-            {
-                node.Rect.Min -= newOrigin;
-                node.Rect.Max -= newOrigin;
-            }
-        }
-
-        public class Node
-        {
-            internal Node Child_1;
-            internal Node Child_2;
-
-            internal int  Height;
-            internal int  Id;
-            internal Node Parent;
-
-            internal Rect Rect;
-            public Box Box;
-
-            internal bool IsLeaf => Child_1 == null;
-
-            public override string ToString()
-            {
-                return Id.ToString();
-            }
-
-            public void SetChild_1(Node node)
-            {
-                node.Parent = this;
-                Child_1 = node;
-            }
-
-            public void SetChild_2(Node node)
-            {
-                node.Parent = this;
-                Child_2 = node;
-            }
+            return _nodes.FirstOrDefault(p => p.Box == box);
         }
     }
 }

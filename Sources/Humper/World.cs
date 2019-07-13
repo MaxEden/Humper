@@ -20,10 +20,9 @@ namespace Humper
         public void DrawDebug(Rect area, Action<Rect, float> drawCell, Action<Box> drawBox, Action<string, int, int, float> drawString)
         {
             // Drawing boxes
-            var boxes = _broadPhase.QueryBoxes(area);
-            foreach(var box in boxes)
+            foreach(var box in Boxes)
             {
-                drawBox(box);
+               drawBox(box);
             }
 
             _broadPhase.DrawDebug(area, drawCell, drawBox, drawString);
@@ -34,14 +33,13 @@ namespace Humper
         #region Boxes
 
         private readonly IBroadPhase _broadPhase;
-
-        public int Boxes { get; private set; }
+        public readonly List<Box> Boxes = new List<Box>();
 
         public Box Create(Rect area)
         {
             var box = new Box(this, area);
+            Boxes.Add(box);
             _broadPhase.Add(box);
-            Boxes++;
             return box;
         }
 
@@ -52,7 +50,7 @@ namespace Humper
 
         public bool Remove(Box box)
         {
-            Boxes--;
+            Boxes.Remove(box);
             return _broadPhase.Remove(box);
         }
 
@@ -105,7 +103,7 @@ namespace Humper
             {
                 Origin = origin,
                 Goal = goal,
-                Destination = Simulate(hits, new List<Box>
+                Destination = SimulateDestination(hits, new List<Box>
                                            {box}, box, origin, goal, response),
                 Hits = hits
             };
@@ -113,7 +111,7 @@ namespace Humper
             return result;
         }
 
-        private Rect Simulate(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, CollisionResponse response)
+        private Rect SimulateDestination(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, CollisionResponse response)
         {
             var nearest = Hit(origin, destination, ignoring);
 
@@ -124,18 +122,19 @@ namespace Humper
                 var impact = new Rect(nearest.Position, origin.Size);
                 var collision = new Collision
                     {Box = box, Hit = nearest, Goal = destination, Origin = origin};
+
                 var dest = response(collision);
 
-                if(response != null && destination != dest)
+                if(dest != null && destination != dest)
                 {
                     ignoring.Add(nearest.Box);
-                    if(ignoring.Count > 20)
+                    if(ignoring.Count > 2)
                     {
-                        return dest;
+                        return dest.Value;
                     }
                     else
                     {
-                        return Simulate(hits, ignoring, box, impact, dest, response);
+                        return SimulateDestination(hits, ignoring, box, impact, dest.Value, response);
                     }
                 }
             }

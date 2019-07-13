@@ -13,7 +13,6 @@ namespace Humper
         
         public Rect Bounds => _bounds;
         public   object Data;
-        internal object BroadPhaseData;
 
         public Box(World world, Rect area)
         {
@@ -23,14 +22,10 @@ namespace Humper
 
         #region Movements
 
-        public IMovement Simulate(Vector2 destination, CollisionResponse filter)
-        {
-            return _world.Simulate(this, destination, filter);
-        }
         public IMovement Move(Vector2 destination, CollisionResponse filter)
         {
             IsActive = true;
-            var movement = Simulate(destination, filter);
+            var movement = _world.Simulate(this, destination, filter);
             _bounds = movement.Destination;
             _world.Update(this, movement.Origin);
             return movement;

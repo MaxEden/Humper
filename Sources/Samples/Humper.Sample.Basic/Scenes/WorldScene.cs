@@ -22,29 +22,29 @@ namespace Humper.Sample.Basic
 		{
 			get
 			{
-				return $"[Up,Right,Down,Left]: move\n[Space]: show grid; Boxes count:" + World.Boxes;
+				return $"[Up,Right,Down,Left]: move\n[Space]: show grid; Boxes count:" + World.Boxes.Count;
 			} 
 		}
 
-		private SpriteBatch spriteBatch;
+		private SpriteBatch _spriteBatch;
 
-		private SpriteFont font;
+		private SpriteFont _font;
 
 		public virtual void Draw(SpriteBatch sb)
 		{
 			var b = World.Bounds;
-			spriteBatch = sb;
+			_spriteBatch = sb;
 			World.DrawDebug(b, DrawCell, DrawBox, DrawString);
 
 			
-			spriteBatch.Draw(new Rect(Mandarin.Common.Misc.Vector2.Zero, Mandarin.Common.Misc.Vector2.One*5f), Color.Red, 1f);
-			spriteBatch.Draw(new Rect(Mandarin.Common.Misc.Vector2.up * 100, Mandarin.Common.Misc.Vector2.One*5f), Color.Blue, 1f);
+			_spriteBatch.Draw(new Rect(Mandarin.Common.Misc.Vector2.Zero, Mandarin.Common.Misc.Vector2.One*5f), Color.Red, 1f);
+			_spriteBatch.Draw(new Rect(Mandarin.Common.Misc.Vector2.up * 100, Mandarin.Common.Misc.Vector2.One*5f), Color.Blue, 1f);
 		}
 
 		private void DrawCell(Rect rect, float alpha)
 		{
 			if (Keyboard.GetState().IsKeyDown(Keys.Space))
-				spriteBatch.DrawStroke(rect, new Color(Color.White, alpha));
+				_spriteBatch.DrawStroke(rect, new Color(Color.White, alpha));
 		}
 
 		private void DrawBox(Box box)
@@ -62,19 +62,19 @@ namespace Humper.Sample.Basic
 			else
 				color = new Color(165, 155, 250);
 
-			spriteBatch.Draw(box.Bounds, color, 0.3f);
+			_spriteBatch.Draw(box.Bounds, color, 0.3f);
 		}
 
 		public void LoadContent(ContentManager content)
 		{
-			font = content.Load<SpriteFont>("font");
+			_font = content.Load<SpriteFont>("font");
 		}
 
 		private void DrawString(string message, int x, int y, float alpha)
 		{
-			var size = font.MeasureString(message);
+			var size = _font.MeasureString(message);
 			if (Keyboard.GetState().IsKeyDown(Keys.Space))
-				spriteBatch.DrawString(font, message, new Vector2(x - size.X / 2, spriteBatch.GraphicsDevice.Viewport.Height - (y - size.Y / 2)), new Color(Color.White, alpha));
+				_spriteBatch.DrawString(_font, message, new Vector2(x - size.X / 2, _spriteBatch.GraphicsDevice.Viewport.Height - (y - size.Y / 2)), new Color(Color.White, alpha));
 		}
 
 		public abstract void Initialize();

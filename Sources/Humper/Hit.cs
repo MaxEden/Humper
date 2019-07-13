@@ -87,12 +87,12 @@ namespace Humper
             {
                 var outside = PushOutside(origin, other);
                 origin.Position = outside.position;
-                //return new Hit
-                //{
-                //    Amount = 0,
-                //    Position = outside.position,
-                //    Normal = outside.normal
-                //};
+                return new Hit
+                {
+                    Amount = 0,
+                    Position = outside.position,
+                    Normal = outside.normal
+                };
             }
             //return null;
 
@@ -191,9 +191,9 @@ namespace Humper
 
         public static Hit Resolve(Rect origin, Rect destination, Rect other)
         {
-            var broadphaseArea = Rect.Union(origin, destination);
+            //var broadphaseArea = Rect.Union(origin, destination);
 
-            if(broadphaseArea.Overlaps(other) || broadphaseArea.Contains(other))
+            //if(broadphaseArea.Overlaps(other) || broadphaseArea.Contains(other))
             {
                 return ResolveNarrow(origin, destination, other);
             }

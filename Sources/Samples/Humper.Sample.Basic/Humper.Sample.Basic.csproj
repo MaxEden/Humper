@@ -32,6 +32,9 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Profiler.Api, Version=1.0.19.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\Mandarin\packages\JetBrains.Profiler.Api.1.0.19\lib\net471\JetBrains.Profiler.Api.dll</HintPath>
+    </Reference>
     <Reference Include="MonoGame.Framework, Version=3.7.1.189, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\MonoGame.Framework.DesktopGL.3.7.1.189\lib\net45\MonoGame.Framework.dll</HintPath>
     </Reference>

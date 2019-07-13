@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
+
 #if MONOMAC
 using MonoMac.AppKit;
 using MonoMac.Foundation;
@@ -20,14 +22,14 @@ namespace Humper.Sample.Basic
 	static class Program
 #endif
 	{
-		private static Game1 game;
+		private static Game1 _game;
 
 		internal static void RunGame()
 		{
-			game = new Game1();
-			game.Run();
+			_game = new Game1();
+			_game.Run(GameRunBehavior.Synchronous);
 #if !__IOS__ && !__TVOS__
-			game.Dispose();
+			_game.Dispose();
 #endif
 		}
 

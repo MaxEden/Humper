@@ -36,7 +36,7 @@ namespace Humper
         public IList<Box> QueryBoxes(Rect area)
         {
             var cells = QueryCells(area);
-            return cells.SelectMany(cell => cell.Children).Distinct().ToList();
+            return cells.SelectMany(cell => cell.QueryBoxes(area)).Distinct().ToList();
         }
         public Rect Bounds => new Rect(0, 0, Cells.GetLength(0) * CellSize, Cells.GetLength(1) * CellSize);
 
@@ -46,10 +46,7 @@ namespace Humper
 
             foreach(var cell in cells)
             {
-                if(!cell.Contains(box))
-                {
                     cell.Add(box);
-                }
             }
         }
 
@@ -121,11 +118,10 @@ namespace Humper
         }
         public class Cell
         {
-            private readonly HashSet<Box> children = new HashSet<Box>();
+            private readonly HashSet<Box> _children = new HashSet<Box>();
 
             public Rect Bounds { get; }
 
-            public IEnumerable<Box> Children => children;
             public Cell(int x, int y, float cellSize)
             {
                 Bounds = new Rect(x * cellSize, y * cellSize, cellSize, cellSize);
@@ -133,22 +129,22 @@ namespace Humper
 
             public void Add(Box box)
             {
-                children.Add(box);
-            }
-
-            public bool Contains(Box box)
-            {
-                return children.Contains(box);
+                _children.Add(box);
             }
 
             public bool Remove(Box box)
             {
-                return children.Remove(box);
+                var result = _children.Remove(box);
+                return result;
             }
 
             public int Count()
             {
-                return children.Count;
+                return _children.Count;
+            }
+            public IEnumerable<Box> QueryBoxes(Rect area)
+            {
+                return _children.Where(p => p.Bounds.Overlaps(area));
             }
         }
 

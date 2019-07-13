@@ -16,25 +16,25 @@ namespace Humper.Sample.Basic
 		{
 			public Crate(Box box)
 			{
-				this.box = box.AddTags(Tags.Group5);
-				this.box.Data = this;
+				this._box = box.AddTags(Tags.Group5);
+				this._box.Data = this;
 			}
 
-			private Box box;
+			private Box _box;
 
-			public Vector2 velocity;
+			public Vector2 Velocity;
 
-			private bool inWater;
+			private bool _inWater;
 
 			public void Update(float delta)
 			{
-				velocity.Y += delta * 0.001f;
+				Velocity.Y += delta * 0.001f;
 
 
-				if (inWater)
-					velocity.Y *= 0.5f;
+				if (_inWater)
+					Velocity.Y *= 0.5f;
 
-				var move = box.Move(box.Bounds.Position + delta * velocity, (collision) =>
+				var move = _box.Move(_box.Bounds.Position + delta * Velocity, (collision) =>
 				{
 					if (collision.Other.HasTag(Tags.Group3))
 					{
@@ -44,16 +44,16 @@ namespace Humper.Sample.Basic
 					return Response.Slide(collision);
 				});
 
-				inWater = (move.Hits.Any((c) => c.Box.HasTag(Tags.Group3)));
+				_inWater = (move.Hits.Any((c) => c.Box.HasTag(Tags.Group3)));
 
 
-				velocity.X *= 0.85f;
+				Velocity.X *= 0.85f;
 
 				// Testing if on ground
 				if (move.Hits.Any((c) => c.Box.HasTag(Tags.Group2) && (c.Normal.Y < 0)))
 				{
-					velocity.Y = 0;
-					velocity.X *= 0.85f;
+					Velocity.Y = 0;
+					Velocity.X *= 0.85f;
 				}
 
 			}
@@ -63,11 +63,11 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private Box player1, platform;
+		private Box _player1, _platform;
 
-		private Crate[] crates;
+		private Crate[] _crates;
 
-		private Vector2 platformVelocity = Vector2.right * 0.05f;
+		private Vector2 _platformVelocity = Vector2.right * 0.05f;
 
 		public override void Initialize()
 		{
@@ -76,9 +76,9 @@ namespace Humper.Sample.Basic
 
 			SpawnPlayer();
 
-			platform = World.Create(new Rect(0, 200, 100, 20)).AddTags(Tags.Group4);
+			_platform = World.Create(new Rect(0, 200, 100, 20)).AddTags(Tags.Group4);
 
-			crates = new[]
+			_crates = new[]
 			{
 				new Crate(World.Create(new Rect(150, 220, 40, 40))),
 				new Crate(World.Create(new Rect(210, 220, 40, 40))),
@@ -97,63 +97,63 @@ namespace Humper.Sample.Basic
 
 		private void SpawnPlayer()
 		{
-			if(player1 != null)
-				World.Remove(player1);
+			if(_player1 != null)
+				World.Remove(_player1);
 
-			player1 = World.Create(new Rect(50, 50, 10, 24)).AddTags(Tags.Group1);
-			velocity = Vector2.Zero;
+			_player1 = World.Create(new Rect(50, 50, 10, 24)).AddTags(Tags.Group1);
+			_velocity = Vector2.Zero;
 		}
 
 		public override void Update(GameTime time)
 		{
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
 
-			UpdatePlatform(platform, delta);
+			UpdatePlatform(_platform, delta);
 			 
-			foreach (var crate in crates)
+			foreach (var crate in _crates)
 			{
 				crate.Update(delta);
 			}
 
-			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
+			UpdatePlayer(_player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
 		}
 
-		private Vector2 velocity = Vector2.Zero;
-		private KeyboardState state;
-		private float timeInRed;
-		private bool onPlatform;
+		private Vector2 _velocity = Vector2.Zero;
+		private KeyboardState _state;
+		private float _timeInRed;
+		private bool _onPlatform;
 
 		private void UpdatePlatform(Box platform, float delta)
 		{
-			if ((platform.Bounds.xMin < 50 && platformVelocity.X < 0) || (platform.Bounds.xMin > 300 && platformVelocity.X > 0))
+			if ((platform.Bounds.xMin < 50 && _platformVelocity.X < 0) || (platform.Bounds.xMin > 300 && _platformVelocity.X > 0))
 			{
-				platformVelocity.X *= -1;
+				_platformVelocity.X *= -1;
 			}
 
-			platform.Move(new Vector2(platform.Bounds.xMin + platformVelocity.X * delta, platform.Bounds.Y), Response.Cross);
+			platform.Move(new Vector2(platform.Bounds.xMin + _platformVelocity.X * delta, platform.Bounds.Y), Response.Cross);
 		}
 
 		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
 		{
-			velocity.Y += delta * 0.001f;
-			velocity.X = 0;
+			_velocity.Y += delta * 0.001f;
+			_velocity.X = 0;
 
 			var k = Keyboard.GetState();
 			if (k.IsKeyDown(right))
-				velocity.X += 0.1f;
+				_velocity.X += 0.1f;
 			if (k.IsKeyDown(left))
-				velocity.X -= 0.1f;
-			if (state.IsKeyUp(up) && k.IsKeyDown(up))
-				velocity.Y -= 0.5f;
+				_velocity.X -= 0.1f;
+			if (_state.IsKeyUp(up) && k.IsKeyDown(up))
+				_velocity.Y -= 0.5f;
 
-			if (onPlatform)
-				velocity += platformVelocity;
+			if (_onPlatform)
+				_velocity += _platformVelocity;
 
-			if (timeInRed > 0)
-				velocity.Y *= 0.75f;
+			if (_timeInRed > 0)
+				_velocity.Y *= 0.75f;
 
 			// Moving player
-			var move = player.Move(player.Bounds.Position + delta * velocity, (collision) =>
+			var move = player.Move(player.Bounds.Position + delta * _velocity, (collision) =>
 			{
 				if (collision.Other.HasTag(Tags.Group3))
 				{
@@ -164,12 +164,12 @@ namespace Humper.Sample.Basic
 			});
 
 			// Testing if on moving platform
-			onPlatform = move.Hits.Any((c) => c.Box.HasTag(Tags.Group4));
+			_onPlatform = move.Hits.Any((c) => c.Box.HasTag(Tags.Group4));
 
 			// Testing if on ground
 			if (move.Hits.Any((c) => c.Box.HasTag(Tags.Group4, Tags.Group2, Tags.Group5) && (c.Normal.Y < 0)))
 			{
-				velocity.Y = 0;
+				_velocity.Y = 0;
 			}
 
 			var pushedCrateCollision = move.Hits.FirstOrDefault((c) => c.Box.HasTag(Tags.Group5));
@@ -177,24 +177,24 @@ namespace Humper.Sample.Basic
 			{
 				var pushedCrate = pushedCrateCollision.Box.Data as Crate;
 				var n = pushedCrateCollision.Normal;
-				pushedCrate.velocity = new Vector2(n.X * n.X,n.Y * n.Y) * velocity;
+				pushedCrate.Velocity = new Vector2(n.X * n.X,n.Y * n.Y) * _velocity;
 			}
 
 			// Testing if in red water
 			if (move.Hits.Any((c) => c.Box.HasTag(Tags.Group3)))
 			{
-				timeInRed += delta;
-				if (timeInRed > 3000)
+				_timeInRed += delta;
+				if (_timeInRed > 3000)
 					SpawnPlayer();
 			}
 			else
 			{
-				timeInRed = 0;
+				_timeInRed = 0;
 			}
 
-			player.Data = velocity;
+			player.Data = _velocity;
 
-			state = k;
+			_state = k;
 		}
 	}
 }

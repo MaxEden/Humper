@@ -16,12 +16,12 @@ namespace Humper.Sample.Basic
 	{
 		public class Particle
 		{
-			public static Random random = new Random();
+			public static Random Random = new Random();
 
 			public Particle(Box box)
 			{
 				Box = box;
-				Velocity = new Vector2((float)random.NextDouble() * 0.1f, 0);
+				Velocity = new Vector2((float)Random.NextDouble() * 0.1f, 0);
 			}
 
 			public Box Box { get; set; }
@@ -52,13 +52,13 @@ namespace Humper.Sample.Basic
 		{
 		}
 
-		private Box player1;
+		private Box _player1;
 
-		private Vector2 platformVelocity = Vector2.right * 0.05f;
+		private Vector2 _platformVelocity = Vector2.right * 0.05f;
 
 		public override void Initialize()
 		{
-			World = new World(new Grid(1024, 700, 10));
+			World = new World(new Grid(1024, 700, 30));
 			//World = new World(new DynamicTree());
 
 			SpawnPlayer();
@@ -69,76 +69,87 @@ namespace Humper.Sample.Basic
 			World.Create(new Rect(1004, 20, 20, 660)).AddTags(Tags.Group2);
 			World.Create(new Rect(0, 680, 1024, 20)).AddTags(Tags.Group2);
 
-			int maxBoxes = 200;
+			SpawnBoxes();
+
+		}
+		private void SpawnBoxes()
+		{
+			int maxBoxes = 100;
+			int i = 0;
 			int width = 5;
-			for (int x = 24; x < 1000; x+=width*2)
+			for(int x = 24; x < 1000; x += width * 2)
 			{
-				for(int y = 40; y < 500; y+= width*5)
+				for(int y = 40; y < 500; y += width * 5)
 				{
 					var box = World.Create(new Rect(
-						                            x,
-						                            y,
-						                            (float)(Particle.random.NextDouble()*width) + 0.001f,
-						                            (float)(Particle.random.NextDouble()*width) + 0.001f
-						)).AddTags(Tags.Group3);
-					particles.Add(new Particle(box));
-					if(World.Boxes>maxBoxes) return;
+						                       x,
+						                       y,
+						                       (float)(Particle.Random.NextDouble() * width) + 0.001f,
+						                       (float)(Particle.Random.NextDouble() * width) + 0.001f
+					                       )).AddTags(Tags.Group3);
+					_particles.Add(new Particle(box));
+					i++;
+					if(i > maxBoxes) return;
 				}
 			}
-
 		}
 
 		private void SpawnPlayer()
 		{
-			if (player1 != null)
-				World.Remove(player1);
+			if (_player1 != null)
+				World.Remove(_player1);
 
-			player1 = World.Create(new Rect(50, 100, 50, 30)).AddTags(Tags.Group1);
-			velocity = Vector2.Zero;
+			_player1 = World.Create(new Rect(50, 100, 50, 30)).AddTags(Tags.Group1);
+			_velocity = Vector2.Zero;
 		}
 
 		public override void Update(GameTime time)
 		{
 			
 			var delta = (float)time.ElapsedGameTime.TotalMilliseconds;
+			//delta = 100;
 
-			foreach (var p in particles)
+			foreach (var p in _particles)
 			{
 				p.Update(delta);
 			}
 
 			//return;
-			UpdatePlayer(player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
+			UpdatePlayer(_player1, delta, Keys.Left, Keys.Up, Keys.Right, Keys.Down);
 		}
 
-		private Vector2 velocity = Vector2.Zero;
-		private KeyboardState state;
-		private float timeInRed;
-		private List<Particle> particles = new List<Particle>();
+		private Vector2 _velocity = Vector2.Zero;
+		private KeyboardState _state;
+		private List<Particle> _particles = new List<Particle>();
 
 		private void UpdatePlayer(Box player, float delta, Keys left, Keys up, Keys right, Keys down)
 		{
-			velocity.Y += delta * 0.001f;
-			velocity.X = 0;
+			_velocity.Y -= delta * 0.001f;
+			_velocity.X = 0;
 
 			var k = Keyboard.GetState();
 			if (k.IsKeyDown(right))
-				velocity.X += 0.1f;
+				_velocity.X += 0.1f;
 			if (k.IsKeyDown(left))
-				velocity.X -= 0.1f;
-			if (state.IsKeyUp(up) && k.IsKeyDown(up))
-				velocity.Y += 0.5f;
+				_velocity.X -= 0.1f;
+			if (_state.IsKeyUp(up) && k.IsKeyDown(up))
+				_velocity.Y += 0.5f;
+
+			if(_state.IsKeyUp(Keys.R) && k.IsKeyDown(Keys.R))
+			{
+				SpawnBoxes();
+			}
 
 			// Moving player
-			var move = player.Move(player.Bounds.Position + delta * velocity, Response.Slide);
+			var move = player.Move(player.Bounds.Position + delta * _velocity, Response.Slide);
 
 			// Testing if on ground
 			if (move.Hits.Any((c) => c.Box.HasTag(Tags.Group2, Tags.Group3) && (c.Normal.Y < 0)))
 			{
-				velocity.Y = 0;
+				_velocity.Y = 0;
 			}
 
-			state = k;
+			_state = k;
 		}
 	}
 }

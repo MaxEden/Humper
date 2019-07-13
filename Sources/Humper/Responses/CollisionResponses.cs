@@ -2,21 +2,25 @@
 
 namespace Humper.Responses
 {
-    public delegate Rect CollisionResponse(ICollision collision);
+    public delegate Rect? CollisionResponse(ICollision collision);
 
     public static class Response
     {
-        public static Rect Touch(ICollision collision)
+        public static Rect? None(ICollision collision)
+        {
+            return null;
+        }
+        public static Rect? Touch(ICollision collision)
         {
             return new Rect(collision.Hit.Position, collision.Goal.Size);
         }
 
-        public static Rect Cross(ICollision collision)
+        public static Rect? Cross(ICollision collision)
         {
             return collision.Goal;
         }
 
-        public static Rect Slide(ICollision collision)
+        public static Rect? Slide(ICollision collision)
         {
             var velocity = collision.Goal.Center - collision.Origin.Center;
             var normal = collision.Hit.Normal;
@@ -27,7 +31,7 @@ namespace Humper.Responses
             return new Rect(collision.Hit.Position + slide, collision.Goal.Size);
         }
 
-        public static Rect Bounce(ICollision collision)
+        public static Rect? Bounce(ICollision collision)
         {
             var velocity = collision.Goal.Center - collision.Origin.Center;
             var deflected = velocity * collision.Hit.Amount;
