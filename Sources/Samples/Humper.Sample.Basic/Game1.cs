@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Humper.Responses;
@@ -41,7 +42,9 @@ namespace Humper.Sample.Basic
             base.Initialize();
         }
 
-        private IScene _scene;
+        
+        private int _sceneNumber = 100;
+        private List<IScene> _sceneList = new List<IScene>();
 
         private Type[] _scenes = new[]
         {
@@ -67,9 +70,16 @@ namespace Humper.Sample.Basic
         private void NextScene()
         {
             _sceneIndex = (_sceneIndex + 1) % _scenes.Length;
-            _scene = (IScene)Activator.CreateInstance(_scenes[_sceneIndex]);
-            _scene.LoadContent(Content);
-            _scene.Initialize();
+            _sceneList.Clear();
+
+            for(int i = 0; i < _sceneNumber; i++)
+            {
+                var scene = (IScene)Activator.CreateInstance(_scenes[_sceneIndex]);
+                scene.LoadContent(Content);
+                scene.Initialize();
+                _sceneList.Add(scene);
+            }
+            
         }
 
         private KeyboardState _state;
@@ -96,7 +106,7 @@ namespace Humper.Sample.Basic
             _state = Keyboard.GetState();
 
             var sw = Stopwatch.StartNew();
-                _scene.Update(gameTime);
+            _sceneList.ForEach(p=>p.Update(gameTime));
             sw.Stop();
             _updateMs = sw.ElapsedMilliseconds;
 
@@ -111,15 +121,18 @@ namespace Humper.Sample.Basic
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            var scene = _sceneList.FirstOrDefault();
+            if(scene == null) return;
+
             var sw = Stopwatch.StartNew();
 
             _graphics.GraphicsDevice.Clear(new Color(44, 45, 51));
 
             _spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
 
-            _scene.Draw(_spriteBatch);
+            scene.Draw(_spriteBatch);
 
-            _spriteBatch.DrawString(_font, _scene.Message, new Vector2(20, 20), new Color(Color.White, 0.5f));
+            _spriteBatch.DrawString(_font, scene.Message, new Vector2(20, 20), new Color(Color.White, 0.5f));
 
             _spriteBatch.DrawString(_font, $"ms:{_updateMs:###0} " +
                                            $"fps:{1000 / (_updateMs + 0.001f):00.0}",
@@ -133,7 +146,7 @@ namespace Humper.Sample.Basic
                                     new Vector2(20, 120), new Color(Color.Yellow, 0.5f));
 
             _spriteBatch.End();
-            
+
             sw.Stop();
             base.Draw(gameTime);
 

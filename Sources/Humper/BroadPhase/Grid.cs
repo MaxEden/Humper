@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Humper.Base;
+using Mandarin.Common.Collections.Extensions;
 using Mandarin.Common.Misc;
 
 namespace Humper
@@ -33,20 +34,19 @@ namespace Humper
             }
         }
 
-        public IList<Box> QueryBoxes(Rect area)
+        public void QueryBoxes(Rect area, ISet<Box> boxes)
         {
             var cells = QueryCells(area);
-            return cells.SelectMany(cell => cell.QueryBoxes(area)).Distinct().ToList();
+            cells.ForEach(p => boxes.AddRange(p.QueryBoxes(area)));
         }
         public Rect Bounds => new Rect(0, 0, Cells.GetLength(0) * CellSize, Cells.GetLength(1) * CellSize);
 
         public void Add(Box box)
         {
             var cells = QueryCells(box.Bounds);
-
             foreach(var cell in cells)
             {
-                    cell.Add(box);
+                cell.Add(box);
             }
         }
 

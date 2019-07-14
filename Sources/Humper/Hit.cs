@@ -4,25 +4,34 @@ using Mandarin.Common.Misc;
 
 namespace Humper
 {
-    public class Hit : IHit
+    public readonly struct Hit
     {
-        public Hit()
+        public readonly bool    IsHit;
+        public readonly Box     Box;
+        public readonly Vector2 Normal;
+        public readonly float   Amount;
+        public readonly Vector2 Position;
+
+
+        public Hit(bool isHit, Box box, float amount, Vector2 normal, Vector2 position)
         {
-            Normal = Vector2.Zero;
-            Amount = 1.0f;
+            IsHit = isHit;
+            Box = box;
+            Amount = amount;
+            Normal = normal;
+            Position = position;
         }
 
-        public Box Box { get; set; }
-
-        public Vector2 Normal { get; set; }
-
-        public float Amount { get; set; }
-
-        public Vector2 Position { get; set; }
+        public static Hit Empty => new Hit();
+        
+        public Hit WithBox(Box box)
+        {
+            return new Hit(IsHit,box,Amount,Normal,Position);
+        }
 
         public float Remaining => 1.0f - Amount;
 
-        public bool IsNearest(IHit than, Vector2 origin)
+        public bool IsNearest(Hit than, Vector2 origin)
         {
             if(Amount < than.Amount)
             {
@@ -69,12 +78,12 @@ namespace Humper
             else if(index == 2)
             {
                 normal = Vector2.left;
-                position = new Vector2(other.Left - origin.Width  - Constants.Threshold, origin.Y);
+                position = new Vector2(other.Left - origin.Width - Constants.Threshold, origin.Y);
             }
             else if(index == 3)
             {
                 normal = Vector2.right;
-                position = new Vector2(other.Right  + Constants.Threshold, origin.Y);
+                position = new Vector2(other.Right + Constants.Threshold, origin.Y);
             }
 
             return (position, normal);
@@ -87,12 +96,13 @@ namespace Humper
             {
                 var outside = PushOutside(origin, other);
                 origin.Position = outside.position;
-                return new Hit
-                {
-                    Amount = 0,
-                    Position = outside.position,
-                    Normal = outside.normal
-                };
+                return new Hit(
+                    true,
+                    null, 
+                    0,
+                    outside.normal,
+                    outside.position
+                );
             }
             //return null;
 
@@ -155,16 +165,17 @@ namespace Humper
                 entry.X < 0.0f && (origin.Right < other.Left || origin.Left > other.Right) ||
                 entry.Y < 0.0f && (origin.Top < other.Bottom || origin.Bottom > other.Top))
             {
-                return null;
+                return default;
             }
 
 
             var result = new Hit
-            {
-                Amount = entryTime,
-                Position = origin.Position + velocity * entryTime,
-                Normal = GetNormal(invEntry, invExit, entry)
-            };
+            (true,
+             null,
+             entryTime,
+             GetNormal(invEntry, invExit, entry),
+             origin.Position + velocity * entryTime
+            );
 
 
             return result;
@@ -182,23 +193,22 @@ namespace Humper
 
         #region Public functions
 
-        public static IHit Resolve(Rect origin, Rect destination, Box other)
+        public static Hit Resolve(Rect origin, Rect destination, Box other)
         {
             var result = Resolve(origin, destination, other.Bounds);
-            if(result != null) result.Box = other;
-            return result;
+            return result.WithBox(other);
         }
 
         public static Hit Resolve(Rect origin, Rect destination, Rect other)
         {
-            //var broadphaseArea = Rect.Union(origin, destination);
+            var broadphaseArea = Rect.Union(origin, destination);
 
-            //if(broadphaseArea.Overlaps(other) || broadphaseArea.Contains(other))
+            if(broadphaseArea.Overlaps(other) || broadphaseArea.Contains(other))
             {
                 return ResolveNarrow(origin, destination, other);
             }
 
-            return null;
+            return default;
         }
 
         #endregion

@@ -25,6 +25,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Humper.Base;
+using Mandarin.Common;
+using Mandarin.Common.Collections;
+using Mandarin.Common.Collections.Extensions;
 using Mandarin.Common.Misc;
 
 namespace Humper
@@ -45,7 +48,8 @@ namespace Humper
         private readonly List<Node>  _nodes        = new List<Node>();
         private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
-        private          int         _uk = 1;
+        private          int         _uk   = 1;
+        private          Pool        _pool = new Pool();
 
         /// <summary>
         ///     Compute the height of the binary tree in O(N) time. Should not be called often.
@@ -130,13 +134,11 @@ namespace Humper
 
             InsertLeaf(node);
         }
-        public IList<Box> QueryBoxes(Rect area)
+        public void QueryBoxes(Rect area, ISet<Box> boxes)
         {
-            var result = new List<Box>();
-            QueryBoxes(_root, area, result);
-            return result;
+            QueryBoxes(_root, area, boxes);
         }
-        private void QueryBoxes(Node node, Rect rect, IList<Box> boxes)
+        private void QueryBoxes(Node node, Rect rect, ICollection<Box> boxes)
         {
             if(node == null) return;
             if(!node.Rect.Overlaps(rect)) return;
@@ -267,7 +269,7 @@ namespace Humper
             // v is perpendicular to the segment.
             var v = new Vector2(-ray.Y, ray.X);
             var absV = Vector2.Abs(v);
-            
+
             // Separating axis for segment (Gino, p80).
             // |dot(v, p1 - c)| > dot(|v|, h)
             var separation = Math.Abs(Vector2.Dot(v, input.From - node.Rect.Center)) - Vector2.Dot(absV, node.Rect.Extents);

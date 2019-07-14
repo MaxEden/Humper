@@ -126,7 +126,7 @@ namespace Humper.Sample.Basic
 			var hit = Hit.Resolve(_origin, _goal, _other);
 			var r = _values[_response];
 
-			if (hit != null && r != CollisionResponses.None)
+			if (hit.IsHit && r != CollisionResponses.None)
 			{
 				_collision = new Rect(hit.Position, _origin.Size);
 				_normal = new Rect(_collision.Center + hit.Normal * 50, new Vector2(5, 5));

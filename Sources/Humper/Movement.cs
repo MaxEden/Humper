@@ -5,14 +5,14 @@ using Mandarin.Common.Misc;
 
 namespace Humper
 {
-    public class Movement : IMovement
+    public class Movement
     {
         public Movement()
         {
-            Hits = new IHit[0];
+            Hits = new Hit[0];
         }
 
-        public IEnumerable<IHit> Hits { get; set; }
+        public IEnumerable<Hit> Hits { get; set; }
 
         public bool HasCollided => Hits.Any();
 

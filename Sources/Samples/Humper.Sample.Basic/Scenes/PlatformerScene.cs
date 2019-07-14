@@ -173,7 +173,7 @@ namespace Humper.Sample.Basic
 			}
 
 			var pushedCrateCollision = move.Hits.FirstOrDefault((c) => c.Box.HasTag(Tags.Group5));
-			if (pushedCrateCollision != null)
+			if (pushedCrateCollision.IsHit)
 			{
 				var pushedCrate = pushedCrateCollision.Box.Data as Crate;
 				var n = pushedCrateCollision.Normal;

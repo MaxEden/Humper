@@ -33,6 +33,6 @@ namespace Humper
 	    ///     Gets information about the impact point.
 	    /// </summary>
 	    /// <value>The hit.</value>
-	    IHit Hit { get; }
+	    Hit Hit { get; }
     }
 }

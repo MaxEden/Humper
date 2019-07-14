@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Humper.Base;
 using Humper.Responses;
+using Mandarin.Common;
 using Mandarin.Common.Misc;
 
 namespace Humper
 {
     public class World
     {
-        public Rect Bounds => _broadPhase.Bounds;
+        private Pool _pool = new Pool();
+        public  Rect Bounds => _broadPhase.Bounds;
         public World(IBroadPhase broadPhase)
         {
             _broadPhase = broadPhase;
@@ -22,7 +24,7 @@ namespace Humper
             // Drawing boxes
             foreach(var box in Boxes)
             {
-               drawBox(box);
+                drawBox(box);
             }
 
             _broadPhase.DrawDebug(area, drawCell, drawBox, drawString);
@@ -33,7 +35,7 @@ namespace Humper
         #region Boxes
 
         private readonly IBroadPhase _broadPhase;
-        public readonly List<Box> Boxes = new List<Box>();
+        public readonly  List<Box>   Boxes = new List<Box>();
 
         public Box Create(Rect area)
         {
@@ -43,9 +45,9 @@ namespace Humper
             return box;
         }
 
-        public IList<Box> Find(Rect area)
+        public void Find(Rect area, ISet<Box> boxes)
         {
-            return _broadPhase.QueryBoxes(area);
+            _broadPhase.QueryBoxes(area, boxes);
         }
 
         public bool Remove(Box box)
@@ -63,28 +65,29 @@ namespace Humper
 
         #region Hits
 
-        public IHit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
+        public Hit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
         {
+            var boxes = _pool.GetHashSet<Box>();
             var wrap = Rect.Union(origin, destination);
-            var boxes = Find(wrap);
+            Find(wrap, boxes);
 
             if(ignoring != null)
             {
-                boxes = boxes.Except(ignoring).ToList();
+                boxes.ExceptWith(ignoring);
             }
 
-            IHit nearest = null;
+            Hit nearest = new Hit();
 
             foreach(var other in boxes)
             {
                 var hit = Humper.Hit.Resolve(origin, destination, other);
 
-                if(hit != null && (nearest == null || hit.IsNearest(nearest, origin.Position)))
+                if(hit.IsHit && (!nearest.IsHit || hit.IsNearest(nearest, origin.Position)))
                 {
                     nearest = hit;
                 }
             }
-
+            _pool.Return(boxes);
             return nearest;
         }
 
@@ -92,30 +95,30 @@ namespace Humper
 
         #region Movements
 
-        public IMovement Simulate(Box box, Vector2 destination,  CollisionResponse response)
+        public Movement Simulate(Box box, Vector2 destination, CollisionResponse response)
         {
             var origin = box.Bounds;
             var goal = new Rect(destination, box.Bounds.Size);
 
-            var hits = new List<IHit>();
+            var hits = new List<Hit>();
 
             var result = new Movement
             {
                 Origin = origin,
                 Goal = goal,
                 Destination = SimulateDestination(hits, new List<Box>
-                                           {box}, box, origin, goal, response),
+                                                      {box}, box, origin, goal, response),
                 Hits = hits
             };
 
             return result;
         }
 
-        private Rect SimulateDestination(List<IHit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, CollisionResponse response)
+        private Rect SimulateDestination(List<Hit> hits, List<Box> ignoring, Box box, Rect origin, Rect destination, CollisionResponse response)
         {
             var nearest = Hit(origin, destination, ignoring);
 
-            if(nearest != null)
+            if(nearest.IsHit)
             {
                 hits.Add(nearest);
 

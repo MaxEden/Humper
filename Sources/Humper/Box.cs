@@ -22,7 +22,7 @@ namespace Humper
 
         #region Movements
 
-        public IMovement Move(Vector2 destination, CollisionResponse filter)
+        public Movement Move(Vector2 destination, CollisionResponse filter)
         {
             IsActive = true;
             var movement = _world.Simulate(this, destination, filter);
