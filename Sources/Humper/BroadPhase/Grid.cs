@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Mandarin.Common.Collections;
 using Mandarin.Common.Collections.Extensions;
 using Mandarin.Common.Misc;
 
@@ -117,7 +118,7 @@ namespace Humper
         }
         public class Cell
         {
-            private readonly List<Box> _children = new List<Box>();
+            private readonly Buffer<Box> _children = new Buffer<Box>();
 
             public Rect Bounds { get; }
 
@@ -133,8 +134,7 @@ namespace Humper
 
             public bool Remove(Box box)
             {
-                var result = _children.Remove(box);
-                return result;
+                return _children.RemoveAndMixOrder(box);
             }
 
             public int Count()

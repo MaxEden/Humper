@@ -45,11 +45,6 @@ namespace Humper
             return box;
         }
 
-        public void Find(Rect area, ISet<Box> boxes)
-        {
-            _broadPhase.QueryBoxes(area, boxes);
-        }
-
         public bool Remove(Box box)
         {
             Boxes.Remove(box);
@@ -69,7 +64,8 @@ namespace Humper
         {
             var boxes = _pool.GetHashSet<Box>();
             var wrap = Rect.Union(origin, destination);
-            Find(wrap, boxes);
+
+            _broadPhase.QueryBoxes(wrap, boxes);
 
             if(ignoring != null)
             {
