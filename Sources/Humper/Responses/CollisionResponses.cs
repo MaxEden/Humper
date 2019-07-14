@@ -36,12 +36,12 @@ namespace Humper.Responses
             var velocity = collision.Goal.Center - collision.Origin.Center;
             var deflected = velocity * collision.Hit.Amount;
 
-            if(Mathf.Abs(collision.Hit.Normal.X) > 0.00001f)
+            if(Mathf.Abs(collision.Hit.Normal.X) > 0.1f && (collision.Hit.Normal.X * velocity.X < 0))
             {
                 deflected.X *= -1;
             }
 
-            if(Mathf.Abs(collision.Hit.Normal.Y) > 0.00001f)
+            if(Mathf.Abs(collision.Hit.Normal.Y) > 0.1f && (collision.Hit.Normal.Y * velocity.Y < 0))
             {
                 deflected.Y *= -1;
             }

@@ -53,11 +53,6 @@ namespace Humper
             var position = origin.Position;
             var normal = Vector2.Zero;
 
-            //var top = Mathf.Abs(other.Top - origin.Center.Y);
-            //var bottom = Mathf.Abs(other.Bottom - origin.Center.Y);
-            //var left = Mathf.Abs(other.Left - origin.Center.X);
-            //var right = Mathf.Abs(other.Right - origin.Center.X);
-
             var top = Mathf.Abs(other.Top - origin.Bottom);
             var bottom = Mathf.Abs(other.Bottom - origin.Top);
             var left = Mathf.Abs(other.Left - origin.Right);
@@ -104,7 +99,6 @@ namespace Humper
                     outside.position
                 );
             }
-            //return null;
 
             var velocity = destination.Position - origin.Position;
 
@@ -185,10 +179,10 @@ namespace Humper
         {
             if(entry.X > entry.Y)
             {
-                return invEntry.X < 0.0f || Math.Abs(invEntry.X) < Constants.Threshold && invExit.X < 0 ? Vector2.UnitX : -Vector2.UnitX;
+                return invEntry.X < 0.0f || Math.Abs(invEntry.X) < Constants.Threshold && invExit.X < 0 ? Vector2.right : Vector2.left;
             }
 
-            return invEntry.Y < 0.0f || Math.Abs(invEntry.Y) < Constants.Threshold && invExit.Y < 0 ? Vector2.UnitY : -Vector2.UnitY;
+            return invEntry.Y < 0.0f || Math.Abs(invEntry.Y) < Constants.Threshold && invExit.Y < 0 ? Vector2.down : Vector2.up;
         }
 
         #region Public functions

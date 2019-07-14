@@ -24,10 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Humper.Base;
 using Mandarin.Common;
-using Mandarin.Common.Collections;
-using Mandarin.Common.Collections.Extensions;
 using Mandarin.Common.Misc;
 
 namespace Humper

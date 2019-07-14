@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Humper.Base;
 using Mandarin.Common.Collections.Extensions;
 using Mandarin.Common.Misc;
 
@@ -118,7 +117,7 @@ namespace Humper
         }
         public class Cell
         {
-            private readonly HashSet<Box> _children = new HashSet<Box>();
+            private readonly List<Box> _children = new List<Box>();
 
             public Rect Bounds { get; }
 

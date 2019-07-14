@@ -1,5 +1,4 @@
-﻿using Humper.Base;
-using Mandarin.Common.Misc;
+﻿using Mandarin.Common.Misc;
 
 namespace Humper
 {

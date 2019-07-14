@@ -32,7 +32,7 @@ namespace Humper.Sample.Basic
 			{
 				Velocity = Velocity + Vector2.down * delta * 0.001f;
 
-				var move = Box.Move(delta*Velocity + Box.Bounds.Position, Response.Bounce);
+				var move = Box.Move(delta*Velocity + Box.Bounds.Position, Response.Slide);
 
 				// Testing if on ground
 				if (move.Hits.Any((c) => (c.Normal.Y < 0)))
@@ -58,7 +58,7 @@ namespace Humper.Sample.Basic
 
 		public override void Initialize()
 		{
-			World = new World(new Grid(1024, 700, 64));
+			World = new World(new Grid(1024, 700, 20));
 			//World = new World(new DynamicTree());
 
 			SpawnPlayer();
@@ -76,16 +76,16 @@ namespace Humper.Sample.Basic
 		{
 			int maxBoxes = 100;
 			int i = 0;
-			int width = 5;
+			int width = 15;
 			for(int x = 24; x < 1000; x += width * 2)
 			{
-				for(int y = 40; y < 500; y += width * 5)
+				for(int y = 140; y < 500; y += width * 5)
 				{
 					var box = World.Create(new Rect(
 						                       x,
 						                       y,
-						                       (float)(Particle.Random.NextDouble() * width) + 0.001f,
-						                       (float)(Particle.Random.NextDouble() * width) + 0.001f
+						                       (float)(Particle.Random.NextDouble() * width) + 2f,
+						                       (float)(Particle.Random.NextDouble() * width) + 2f
 					                       )).AddTags(Tags.Group3);
 					_particles.Add(new Particle(box));
 					i++;

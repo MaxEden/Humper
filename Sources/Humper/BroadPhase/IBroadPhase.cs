@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Humper.Base;
 using Mandarin.Common.Misc;
 
 namespace Humper
