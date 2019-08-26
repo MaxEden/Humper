@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Humper.Base;
 using Humper.Responses;
 using Mandarin.Common;
 using Mandarin.Common.Misc;

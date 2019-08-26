@@ -1,13 +1,11 @@
-﻿using System;
-using Humper.Base;
-using Mandarin.Common.Misc;
+﻿using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
 
 namespace Humper.Sample.Basic
 {
-	public static class Debug
+    public static class Debug
 	{
 		private static Texture2D _pixel;
 		private static Texture2D GetPixel(this SpriteBatch sb)

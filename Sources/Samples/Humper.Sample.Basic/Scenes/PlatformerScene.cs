@@ -1,16 +1,14 @@
-﻿using Humper.Base;
-using Mandarin.Common.Misc;
+﻿using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
 using Vector2 = Mandarin.Common.Misc.Vector2;
 
 namespace Humper.Sample.Basic
 {
-	using System;
-	using Responses;
-	using Microsoft.Xna.Framework.Input;
-	using System.Linq;
+    using Responses;
+    using Microsoft.Xna.Framework.Input;
+    using System.Linq;
 
-	public class PlatformerScene : WorldScene
+    public class PlatformerScene : WorldScene
 	{
 		public class Crate
 		{

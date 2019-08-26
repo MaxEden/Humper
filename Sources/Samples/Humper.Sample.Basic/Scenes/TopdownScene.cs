@@ -1,7 +1,5 @@
-﻿using Humper.Base;
-using Mandarin.Common.Misc;
-using Microsoft.Xna.Framework;	
-using System;
+﻿using Mandarin.Common.Misc;
+using Microsoft.Xna.Framework;
 using Humper.Responses;
 using Microsoft.Xna.Framework.Input;
 using Vector2 = Mandarin.Common.Misc.Vector2;
@@ -10,7 +8,7 @@ namespace Humper.Sample.Basic
 {
 
 
-	public class TopdownScene : WorldScene
+    public class TopdownScene : WorldScene
 	{
 		public TopdownScene()
 		{

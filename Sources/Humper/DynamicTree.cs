@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Mandarin.Common;
 using Mandarin.Common.Misc;
 
 namespace Humper
@@ -43,10 +42,8 @@ namespace Humper
         public Vector2 DisplacementPredictionMultiplier = Vector2.One * 10;
 
         private readonly List<Node>  _nodes        = new List<Node>();
-        private readonly Stack<Node> _raycastStack = new Stack<Node>();
         private          Node        _root;
         private          int         _uk   = 1;
-        private          Pool        _pool = new Pool();
 
         /// <summary>
         ///     Compute the height of the binary tree in O(N) time. Should not be called often.
@@ -234,14 +231,14 @@ namespace Humper
             QueryNodes(node.Child_2, rect, nodes);
         }
 
-        public List<Box> RayCastBoxes(Rect.RayCastInput input)
+        public List<Box> RayCastBoxes(Ray input)
         {
             var boxes = new List<Box>();
             RayCastBoxes(_root, input, boxes);
             return boxes;
         }
 
-        private void RayCastBoxes(Node node, Rect.RayCastInput input, List<Box> boxes)
+        private void RayCastBoxes(Node node, Ray input, List<Box> boxes)
         {
             if(node == null)
             {

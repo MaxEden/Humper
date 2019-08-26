@@ -1,6 +1,4 @@
-﻿using System;
-using Humper.Base;
-using Mandarin.Common.Misc;
+﻿using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,7 +8,7 @@ using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace Humper.Sample.Basic
 {
-	public abstract class WorldScene : IScene
+    public abstract class WorldScene : IScene
 	{
 		public WorldScene()
 		{

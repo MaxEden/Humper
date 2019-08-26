@@ -1,5 +1,4 @@
 ﻿using System;
-using Humper.Base;
 using Humper.Responses;
 using Mandarin.Common.Misc;
 using Microsoft.Xna.Framework;
@@ -8,11 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Color = Microsoft.Xna.Framework.Color;
 using Vector2 = Mandarin.Common.Misc.Vector2;
-using Humper.Sample.Basic;
 
 namespace Humper.Sample.Basic
 {
-	public class PreviewScene : IScene
+    public class PreviewScene : IScene
 	{
 		public enum CollisionResponses
 		{

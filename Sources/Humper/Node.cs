@@ -41,7 +41,7 @@ namespace Humper
                 if(node != null)
                 {
                     if(node.Parent != null) node.MakeOrphan();
-                    if(node == this.Parent) throw new ArgumentException();
+                    if(node == Parent) throw new ArgumentException();
                     node.Parent = this;
                 }
 

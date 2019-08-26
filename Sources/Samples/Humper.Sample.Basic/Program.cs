@@ -1,7 +1,5 @@
 ﻿#region Using Statements
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
 
 #if MONOMAC
@@ -19,7 +17,7 @@ namespace Humper.Sample.Basic
     [Register("AppDelegate")]
     class Program : UIApplicationDelegate
 #else
-	static class Program
+    static class Program
 #endif
 	{
 		private static Game1 _game;

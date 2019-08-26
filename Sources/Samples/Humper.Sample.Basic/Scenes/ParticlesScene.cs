@@ -1,6 +1,5 @@
 ﻿using Humper.Base;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using Humper.Responses;
 using Microsoft.Xna.Framework.Input;
@@ -12,7 +11,7 @@ using Vector2 = Mandarin.Common.Misc.Vector2;
 namespace Humper.Sample.Basic
 {
 
-	public class ParticlesScene : WorldScene
+    public class ParticlesScene : WorldScene
 	{
 		public class Particle
 		{

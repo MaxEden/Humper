@@ -16,7 +16,7 @@ namespace Humper
 
         public Box(World world, Rect area)
         {
-            this._world = world;
+            _world = world;
             _bounds = area;
         }
 
