@@ -77,7 +77,6 @@ namespace Humper.Sample.Basic
                 scene.Initialize();
                 _sceneList.Add(scene);
             }
-            
         }
 
         private KeyboardState _state;

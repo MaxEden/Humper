@@ -14,7 +14,7 @@ namespace Humper
         public Rect Bounds => _bounds;
         public   object Data;
 
-        public Box(World world, Rect area)
+        internal Box(World world, Rect area)
         {
             _world = world;
             _bounds = area;

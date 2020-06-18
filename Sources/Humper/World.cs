@@ -8,7 +8,6 @@ namespace Humper
 {
     public class World
     {
-        private Pool _pool = new Pool();
         public  Rect Bounds => _broadPhase.Bounds;
         public World(IBroadPhase broadPhase)
         {
@@ -60,7 +59,7 @@ namespace Humper
 
         public Hit Hit(Rect origin, Rect destination, IEnumerable<Box> ignoring = null)
         {
-            var boxes = _pool.GetHashSet<Box>();
+            var boxes = StaticPool.GetHashSet<Box>();
             var wrap = Rect.Union(origin, destination);
 
             _broadPhase.QueryBoxes(wrap, boxes);
@@ -81,7 +80,8 @@ namespace Humper
                     nearest = hit;
                 }
             }
-            _pool.Return(boxes);
+            
+            StaticPool.Return(boxes);
             return nearest;
         }
 
